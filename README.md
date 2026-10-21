@@ -12,6 +12,7 @@ My basic requirements are this:
 3. The user can change the values in real-time via a scriptable interface.
 4. For now, this will be strictly read-only from the perspective of the
    modbus/bacnet client.
+5. Eventually, I want it to be able to "replay" events given some time-series data.
 
 Dependencies:
 
