@@ -50,5 +50,6 @@ class FieldMapParser {
 };
 
 std::string field_type_to_string(FieldType type);
+std::string field_value_to_string(FieldValue value);
 
 #endif // !H_FIELD_MAP_PARSER

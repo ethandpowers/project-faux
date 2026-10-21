@@ -1,6 +1,9 @@
 #include "FieldMapParser.h"
 #include <iostream>
 #include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <variant>
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/node/parse.h>
 #include <yaml-cpp/node/type.h>
@@ -75,6 +78,36 @@ FieldMap FieldMapParser::Parse(std::string path) {
                 "Invalid field map: Invalid field type for " + field.name);
         }
 
+        if (fieldYaml["default"]) {
+            if (!fieldYaml["default"].IsScalar()) {
+                throw std::runtime_error("Invalid field map: Default for " +
+                                         field.name + " is non-scalar");
+            }
+
+            YAML::Node defaultNode = fieldYaml["default"];
+
+            switch (field.type) {
+            case FieldType::String:
+                field.value = defaultNode.as<std::string>();
+                break;
+            case FieldType::Int:
+                field.value = defaultNode.as<std::int32_t>();
+                break;
+            case FieldType::Float:
+                field.value = defaultNode.as<float>();
+                break;
+            case FieldType::Double:
+                field.value = defaultNode.as<double>();
+                break;
+            case FieldType::Bool:
+                field.value = defaultNode.as<bool>();
+                break;
+            default:
+                throw std::runtime_error(
+                    "Bug: Unhandled default for FieldType");
+            }
+        }
+
         map.fields.push_back(field);
     }
 
@@ -96,6 +129,7 @@ void FieldMap::Print() {
     for (Field field : this->fields) {
         std::cout << "Name: " << field.name << "\n";
         std::cout << "Type: " << field_type_to_string(field.type) << "\n";
+        std::cout << "Default: " << field_value_to_string(field.value) << "\n";
 
         std::cout << "\n";
     }
@@ -116,4 +150,19 @@ std::string field_type_to_string(FieldType type) {
     }
 
     return "unknown";
+}
+
+std::string field_value_to_string(FieldValue value) {
+    return std::visit(
+        [](const auto &arg) -> std::string {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, std::string>) {
+                return arg;
+            } else if constexpr (std::is_same_v<T, bool>) {
+                return arg ? "true" : "false";
+            } else {
+                return std::to_string(arg);
+            }
+        },
+        value);
 }
