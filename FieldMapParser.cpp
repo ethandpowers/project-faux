@@ -1,4 +1,5 @@
 #include "FieldMapParser.h"
+#include <cstdint>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -108,6 +109,28 @@ FieldMap FieldMapParser::Parse(std::string path) {
             }
         }
 
+        if (fieldYaml["modbus"]) {
+            if (fieldYaml["modbus"].IsScalar()) {
+                int reg = fieldYaml["modbus"].as<int>();
+                field.modbus = ModbusOpts{.reg_start = reg, .reg_end = reg};
+            } else {
+                if (!fieldYaml["modbus"]["start"] ||
+                    !fieldYaml["modbus"]["end"]) {
+                    throw std::runtime_error(
+                        "Invalid field map: Malformed modbus options");
+                }
+
+                field.modbus = ModbusOpts{
+                    .reg_start = fieldYaml["modbus"]["start"].as<int>(),
+                    .reg_end = fieldYaml["modbus"]["end"].as<int>()};
+            }
+        }
+
+        if (fieldYaml["bacnet"]) {
+            field.bacnet =
+                BacnetOpts{.instance = fieldYaml["bacnet"].as<int>()};
+        }
+
         map.fields.push_back(field);
     }
 
@@ -130,6 +153,14 @@ void FieldMap::Print() {
         std::cout << "Name: " << field.name << "\n";
         std::cout << "Type: " << field_type_to_string(field.type) << "\n";
         std::cout << "Default: " << field_value_to_string(field.value) << "\n";
+        if (field.modbus) {
+            std::cout << "Modbus reg: " << field.modbus->reg_start << "-"
+                      << field.modbus->reg_end << "\n";
+        }
+
+        if (field.bacnet) {
+            std::cout << "BACnet instance: " << field.bacnet->instance << "\n";
+        }
 
         std::cout << "\n";
     }

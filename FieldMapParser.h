@@ -18,13 +18,13 @@ enum class FieldType {
 using FieldValue = std::variant<std::string, std::int32_t, float, double, bool>;
 
 struct ModbusOpts {
-    int modbus_start;
-    int modbus_end; // Even though this field is optional from the user's
-                    // perspective, it will be inferred here
+    int reg_start;
+    int reg_end; // Even though this field is optional from the user's
+                 // perspective, it will be inferred here
 };
 
 struct BacnetOpts {
-    int bacnet_instance;
+    int instance;
 };
 
 struct Field {
