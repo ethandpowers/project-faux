@@ -49,4 +49,6 @@ class FieldMapParser {
     FieldMap Parse(std::string path);
 };
 
+std::string field_type_to_string(FieldType type);
+
 #endif // !H_FIELD_MAP_PARSER
