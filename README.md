@@ -10,3 +10,9 @@ My basic requirements are this:
    default values, and modbus/bacnet registers.
 2. This program serves those fields on the respective platforms as configured.
 3. The user can change the values in real-time via a scriptable interface.
+4. For now, this will be strictly read-only from the perspective of the
+   modbus/bacnet client.
+
+Dependencies:
+
+- yaml-cpp

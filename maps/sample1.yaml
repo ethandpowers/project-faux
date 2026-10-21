@@ -1,0 +1,34 @@
+name: my_fictional_device
+modbus_device_id: 1
+bacnet_device_id: 0
+fields:
+  - name: status
+    type: string
+    default: online
+    modbus:
+      start: 0
+      end: 255
+    bacnet: 0
+
+  - name: run_time_seconds
+    type: int
+    default: 0
+    modbus: 256
+    bacnet: 256
+
+  - name: temp_f
+    type: float
+    default: 68.5
+    modbus: 257
+    bacnet: 257
+
+  - name: energy
+    type: double
+    modbus: 258
+    bacnet: 258
+
+  - name: has_alarms
+    type: bool
+    default: false
+    modbus: 259
+    bacnet: 259
