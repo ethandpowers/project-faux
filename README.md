@@ -17,3 +17,4 @@ My basic requirements are this:
 Dependencies:
 
 - yaml-cpp
+- libmodbus
