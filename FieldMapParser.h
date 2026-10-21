@@ -40,6 +40,8 @@ struct FieldMap {
     std::optional<uint8_t> modbus_device_id;
     std::optional<int32_t> bacnet_device_id;
     std::vector<Field> fields;
+
+    void Print();
 };
 
 class FieldMapParser {

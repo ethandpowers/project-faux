@@ -1,6 +1,9 @@
-#include <iostream>
+#include "FieldMapParser.h"
 
 int main() {
-    std::cout << "Hello world!\n";
+    FieldMapParser parser;
+    FieldMap map = parser.Parse("./maps/sample1.yaml");
+
+    map.Print();
     return 0;
 }
