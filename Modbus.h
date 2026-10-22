@@ -19,13 +19,15 @@ class ModbusServer {
 
   private:
     FieldMap &map_;
-    modbus_t *modbus_context_;
-    int socket_;
-    int nb_connections_;
+    modbus_t *modbus_context_ = nullptr;
+    modbus_mapping_t *modbus_mapping_ = nullptr;
+    int socket_ = -1;
+    int nb_connections_ = 1;
     std::thread t_;
-    std::atomic<bool> stop_;
+    std::atomic<bool> stop_{false};
 
     void ServeContext();
+    void BuildModbusMapping();
 };
 
 #endif // !H_MODBUS
