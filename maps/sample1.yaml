@@ -53,6 +53,7 @@ fields:
 
   - name: frequency_factor
     type: int16
+    default: 60
     modbus: 268
     bacnet: 262
 

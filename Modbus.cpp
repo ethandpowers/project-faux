@@ -160,12 +160,11 @@ void ModbusServer::BuildModbusMapping() {
 
         int start = field.modbus.value().reg_start;
         int end = field.modbus.value().reg_end;
-        // TODO: Populate the mapping
 
         switch (field.type) {
-        case FieldType::String:
+        case FieldType::String: {
             std::string value = std::get<std::string>(field.value);
-            for (int i = start; i <= end; i++) {
+            for (int i = 0; i <= end - start + 1; i++) {
                 std::size_t pos = static_cast<std::size_t>(i) * 2;
                 uint16_t packed = 0;
 
@@ -181,6 +180,12 @@ void ModbusServer::BuildModbusMapping() {
 
                 modbus_mapping_->tab_registers[start + i] = packed;
             }
+            break;
+        }
+        case FieldType::Int16:
+            modbus_mapping_->tab_registers[start] =
+                static_cast<std::uint16_t>(std::get<std::int16_t>(field.value));
+            break;
         }
     }
 }

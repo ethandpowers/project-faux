@@ -14,7 +14,11 @@ My basic requirements are this:
    modbus/bacnet client.
 5. Eventually, I want it to be able to "replay" events given some time-series data.
 
-Dependencies:
+## Dependencies
 
 - yaml-cpp
 - libmodbus
+
+> [!NOTE]
+> This uses zero-based registers across the board, so the field map and request
+> register numbers must match.
