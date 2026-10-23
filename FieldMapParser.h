@@ -9,13 +9,18 @@
 
 enum class FieldType {
     String,
-    Int,
+    Int16,
+    Int32,
+    Uint16,
+    Uint32,
     Float,
     Double,
     Bool,
 };
 
-using FieldValue = std::variant<std::string, std::int32_t, float, double, bool>;
+using FieldValue =
+    std::variant<std::string, std::int16_t, std::int32_t, std::uint16_t,
+                 std::uint32_t, float, double, bool>;
 
 struct ModbusOpts {
     int reg_start;
@@ -47,8 +52,10 @@ struct FieldMap {
 class FieldMapParser {
   public:
     FieldMap Parse(std::string path);
+    bool IsValidReg(int reg);
 };
 
+int field_type_bytes(FieldType type);
 std::string field_type_to_string(FieldType type);
 std::string field_value_to_string(FieldValue value);
 

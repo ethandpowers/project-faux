@@ -154,7 +154,14 @@ void ModbusServer::BuildModbusMapping() {
         }
     }
 
-    // TODO: Populate the mapping
+    for (Field &field : map_.fields) {
+        if (!field.modbus)
+            continue;
+
+        int start = field.modbus.value().reg_start;
+        int end = field.modbus.value().reg_end;
+        // TODO: Populate the mapping
+    }
 }
 
 void ModbusServer::Stop() {

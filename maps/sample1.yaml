@@ -11,30 +11,54 @@ fields:
     bacnet: 0
 
   - name: run_time_seconds
-    type: int
+    type: uint32
     default: 0
-    modbus: 256
+    modbus:
+      start: 256
+      end: 257
     bacnet: 256
 
   - name: temp_f
     type: float
-    default: 68.5
-    modbus: 257
+    modbus:
+      start: 258
+      end: 259
     bacnet: 257
 
   - name: energy
     type: double
     default: 0
-    modbus: 258
+    modbus:
+      start: 260
+      end: 263
     bacnet: 258
 
   - name: has_alarms
     type: bool
     default: false
-    modbus: 259
+    modbus: 264
     bacnet: 259
 
   - name: last_login
-    type: int
-    modbus: 260
+    type: uint32
+    modbus:
+      start: 265
+      end: 266
     bacnet: 260
+
+  - name: frequency
+    type: uint16
+    modbus: 267
+    bacnet: 261
+
+  - name: frequency_factor
+    type: int16
+    modbus: 268
+    bacnet: 262
+
+  - name: id
+    type: int32
+    modbus:
+      start: 269
+      end: 270
+    bacnet: 263
