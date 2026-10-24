@@ -19,6 +19,6 @@ My basic requirements are this:
 - yaml-cpp
 - libmodbus
 
-> [!NOTE]
-> This uses zero-based registers across the board, so the field map and request
-> register numbers must match.
+> [!NOTE] This uses zero-based registers across the board, so the field map and
+> request register numbers must match.  All multi-register types are
+> represented in big-endian format.

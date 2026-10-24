@@ -59,6 +59,7 @@ fields:
 
   - name: id
     type: int32
+    default: -18
     modbus:
       start: 269
       end: 270
