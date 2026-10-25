@@ -182,18 +182,32 @@ void ModbusServer::BuildModbusMapping() {
             }
             break;
         }
-        case FieldType::Int16:
+        case FieldType::Int16: {
             modbus_mapping_->tab_registers[start] =
                 static_cast<std::uint16_t>(std::get<std::int16_t>(field.value));
             break;
         case FieldType::Int32:
-            int32_t v = std::get<std::int32_t>(field.value);
-            uint32_t u = static_cast<uint32_t>(v);
+            std::uint32_t bits =
+                static_cast<uint32_t>(std::get<std::int32_t>(field.value));
             modbus_mapping_->tab_registers[start] =
-                static_cast<uint16_t>(u >> 16);
+                static_cast<std::uint16_t>(bits >> 16);
             modbus_mapping_->tab_registers[start + 1] =
-                static_cast<uint16_t>(u & 0xFFFF);
+                static_cast<std::uint16_t>(bits & 0xFFFF);
             break;
+        }
+        case FieldType::Uint16: {
+            std::uint16_t value = std::get<std::uint16_t>(field.value);
+            modbus_mapping_->tab_registers[start] = value;
+            break;
+        }
+        case FieldType::Uint32: {
+            std::uint32_t value = std::get<std::uint32_t>(field.value);
+            modbus_mapping_->tab_registers[start] =
+                static_cast<std::uint16_t>(value >> 16);
+            modbus_mapping_->tab_registers[start + 1] =
+                static_cast<std::uint16_t>(value);
+            break;
+        }
         }
     }
 }

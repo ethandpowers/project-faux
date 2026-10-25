@@ -12,7 +12,7 @@ fields:
 
   - name: run_time_seconds
     type: uint32
-    default: 0
+    default: 180
     modbus:
       start: 256
       end: 257
@@ -48,12 +48,13 @@ fields:
 
   - name: frequency
     type: uint16
+    default: 600
     modbus: 267
     bacnet: 261
 
   - name: frequency_factor
     type: int16
-    default: 60
+    default: 10
     modbus: 268
     bacnet: 262
 
