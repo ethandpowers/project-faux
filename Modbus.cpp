@@ -211,6 +211,18 @@ void ModbusServer::BuildModbusMapping() {
             PackUint32(value, start);
             break;
         }
+        case FieldType::Double: {
+            std::uint64_t value;
+            memcpy(&value, &std::get<double>(field.value),
+                   sizeof(std::uint64_t));
+
+            std::uint32_t upper32 = value >> 32;
+            std::uint32_t lower32 = value;
+
+            PackUint32(upper32, start);
+            PackUint32(lower32, start + 2);
+            break;
+        }
         }
     }
 }
@@ -218,8 +230,8 @@ void ModbusServer::BuildModbusMapping() {
 void ModbusServer::PackUint32(std::uint32_t value, int start) {
     modbus_mapping_->tab_registers[start] =
         static_cast<std::uint16_t>(value >> 16);
-    modbus_mapping_->tab_registers[start + 1] =
-        static_cast<std::uint16_t>(value); // Upper bits are truncated by the cast
+    modbus_mapping_->tab_registers[start + 1] = static_cast<std::uint16_t>(
+        value); // Upper bits are truncated by the cast
 }
 
 void ModbusServer::Stop() {
