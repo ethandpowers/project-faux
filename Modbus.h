@@ -3,6 +3,7 @@
 
 #include "FieldMapParser.h"
 #include <atomic>
+#include <cstdint>
 #include <modbus/modbus-tcp.h>
 #include <modbus/modbus.h>
 #include <string>
@@ -28,6 +29,7 @@ class ModbusServer {
 
     void ServeContext();
     void BuildModbusMapping();
+    void PackUint32(std::uint32_t value, int start);
 };
 
 #endif // !H_MODBUS

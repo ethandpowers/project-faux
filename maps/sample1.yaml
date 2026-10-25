@@ -20,6 +20,7 @@ fields:
 
   - name: temp_f
     type: float
+    default: 68.5
     modbus:
       start: 258
       end: 259

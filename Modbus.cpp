@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <modbus/modbus-tcp.h>
 #include <modbus/modbus.h>
@@ -189,10 +191,7 @@ void ModbusServer::BuildModbusMapping() {
         case FieldType::Int32:
             std::uint32_t bits =
                 static_cast<uint32_t>(std::get<std::int32_t>(field.value));
-            modbus_mapping_->tab_registers[start] =
-                static_cast<std::uint16_t>(bits >> 16);
-            modbus_mapping_->tab_registers[start + 1] =
-                static_cast<std::uint16_t>(bits & 0xFFFF);
+            PackUint32(bits, start);
             break;
         }
         case FieldType::Uint16: {
@@ -202,14 +201,25 @@ void ModbusServer::BuildModbusMapping() {
         }
         case FieldType::Uint32: {
             std::uint32_t value = std::get<std::uint32_t>(field.value);
-            modbus_mapping_->tab_registers[start] =
-                static_cast<std::uint16_t>(value >> 16);
-            modbus_mapping_->tab_registers[start + 1] =
-                static_cast<std::uint16_t>(value);
+            PackUint32(value, start);
+            break;
+        }
+        case FieldType::Float: {
+            std::uint32_t value;
+            memcpy(&value, &std::get<float>(field.value),
+                   sizeof(std::uint32_t));
+            PackUint32(value, start);
             break;
         }
         }
     }
+}
+
+void ModbusServer::PackUint32(std::uint32_t value, int start) {
+    modbus_mapping_->tab_registers[start] =
+        static_cast<std::uint16_t>(value >> 16);
+    modbus_mapping_->tab_registers[start + 1] =
+        static_cast<std::uint16_t>(value); // Upper bits are truncated by the cast
 }
 
 void ModbusServer::Stop() {
