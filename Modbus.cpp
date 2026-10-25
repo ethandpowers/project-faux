@@ -223,6 +223,9 @@ void ModbusServer::BuildModbusMapping() {
             PackUint32(lower32, start + 2);
             break;
         }
+        case FieldType::Bool:
+            modbus_mapping_->tab_registers[start] = std::get<bool>(field.value);
+            break;
         }
     }
 }
