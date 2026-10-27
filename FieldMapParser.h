@@ -2,6 +2,8 @@
 #define H_FIELD_MAP_PARSER
 
 #include <cstdint>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <variant>
@@ -30,6 +32,7 @@ struct ModbusOpts {
 
 struct BacnetOpts {
     int instance;
+    bool is_dirty = true;
 };
 
 struct Field {
@@ -45,6 +48,7 @@ struct FieldMap {
     std::optional<uint8_t> modbus_device_id;
     std::optional<int32_t> bacnet_device_id;
     std::vector<Field> fields;
+    std::unique_ptr<std::mutex> mutex = std::make_unique<std::mutex>();
 
     void Print();
 };

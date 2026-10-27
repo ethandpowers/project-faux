@@ -89,7 +89,7 @@ void ModbusServer::ServeContext() {
 
         try {
             BuildModbusMapping();
-        } catch (const std::runtime_error e) {
+        } catch (const std::runtime_error &e) {
             std::cerr << e.what() << "\n";
             break;
         }
@@ -143,6 +143,8 @@ void ModbusServer::ServeContext() {
 }
 
 void ModbusServer::BuildModbusMapping() {
+    std::lock_guard lock(*map_.mutex);
+
     if (!modbus_mapping_) {
         int highest_reg = 0;
         for (Field &field : map_.fields) {
@@ -166,7 +168,7 @@ void ModbusServer::BuildModbusMapping() {
         switch (field.type) {
         case FieldType::String: {
             std::string value = std::get<std::string>(field.value);
-            for (int i = 0; i <= end - start + 1; i++) {
+            for (int i = 0; i <= end - start; i++) {
                 std::size_t pos = static_cast<std::size_t>(i) * 2;
                 uint16_t packed = 0;
 
@@ -188,7 +190,8 @@ void ModbusServer::BuildModbusMapping() {
             modbus_mapping_->tab_registers[start] =
                 static_cast<std::uint16_t>(std::get<std::int16_t>(field.value));
             break;
-        case FieldType::Int32:
+        }
+        case FieldType::Int32: {
             std::uint32_t bits =
                 static_cast<uint32_t>(std::get<std::int32_t>(field.value));
             PackUint32(bits, start);

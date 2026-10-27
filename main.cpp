@@ -1,3 +1,4 @@
+#include "Bacnet.h"
 #include "FieldMapParser.h"
 #include "Modbus.h"
 
@@ -8,8 +9,10 @@ int main() {
     map.Print();
 
     ModbusServer modbus(map);
+    BacnetServer bacnet(map);
 
     modbus.Start();
+    bacnet.Start();
 
     while (true) {
     }

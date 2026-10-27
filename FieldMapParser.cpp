@@ -185,7 +185,7 @@ void FieldMap::Print() {
     }
 
     std::cout << "Fields:\n";
-    for (Field field : this->fields) {
+    for (Field &field : this->fields) {
         std::cout << "Name: " << field.name << "\n";
         std::cout << "Type: " << field_type_to_string(field.type) << "\n";
         std::cout << "Default: " << field_value_to_string(field.value) << "\n";
