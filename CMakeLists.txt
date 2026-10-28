@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(faux main.cpp FieldMapParser.cpp Modbus.cpp Bacnet.cpp)
+add_executable(faux main.cpp FieldMapParser.cpp Modbus.cpp Bacnet.cpp Repl.cpp)
 
 find_package(yaml-cpp REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -23,6 +23,12 @@ FetchContent_Declare(
 set(BACNET_STACK_BUILD_APPS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(bacnet-stack)
 
+FetchContent_Declare(
+    argparse
+    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+)
+FetchContent_MakeAvailable(argparse)
+
 set(BACNET_SERVER_DIR "${bacnet-stack_SOURCE_DIR}/src/bacnet/basic/server")
 target_sources(
     faux
@@ -35,4 +41,5 @@ target_link_libraries(
     PRIVATE
     yaml-cpp::yaml-cpp
     PkgConfig::LIBMODBUS
-    bacnet-stack::bacnet-stack)
+    bacnet-stack::bacnet-stack
+    argparse)
