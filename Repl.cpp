@@ -65,7 +65,6 @@ class ModbusCommand : public Command {
             } else {
                 throw std::runtime_error("Unknown property: " + args_[2]);
             }
-
         } else {
             throw std::runtime_error("Unknown subcommand: " + args_[1]);
         }
@@ -73,6 +72,35 @@ class ModbusCommand : public Command {
 
   private:
     ModbusServer &server_;
+    std::vector<std::string> args_;
+};
+
+class BacnetCommand : public Command {
+  public:
+    BacnetCommand(BacnetServer &server, const std::vector<std::string> &args)
+        : server_(server), args_(args) {
+        if (args.size() < 2)
+            throw std::runtime_error("Command \"bacnet\" expects a subcommand");
+    }
+
+    void Execute() override {
+        if (args_[1] == "start") {
+            if (server_.IsActive())
+                throw std::runtime_error("BACnet server already active");
+
+            server_.Start();
+        } else if (args_[1] == "stop") {
+            if (!server_.IsActive())
+                throw std::runtime_error("BACnet server not active");
+
+            server_.Stop();
+        } else {
+            throw std::runtime_error("Unknown subcommand: " + args_[1]);
+        }
+    }
+
+  private:
+    BacnetServer &server_;
     std::vector<std::string> args_;
 };
 
@@ -114,6 +142,8 @@ std::unique_ptr<Command> Repl::ParseCommand(const std::string &cmd) {
         return std::make_unique<HelpCommand>();
     } else if (args[0] == "modbus") {
         return std::make_unique<ModbusCommand>(modbus_, args);
+    } else if (args[0] == "bacnet") {
+        return std::make_unique<BacnetCommand>(bacnet_, args);
     }
 
     throw std::runtime_error("Unknown command: " + args[0]);

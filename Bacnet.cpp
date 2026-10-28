@@ -25,7 +25,7 @@ BacnetServer::BacnetServer(FieldMap &map) : map_(map) {}
 BacnetServer::~BacnetServer() { Stop(); }
 
 void BacnetServer::Start() {
-    if (t_.joinable()) {
+    if (IsActive()) {
         std::cout << "Attempted to start BACnet, but already running\n";
         return;
     }
@@ -172,9 +172,11 @@ void BacnetServer::SetObjectValues() {
     }
 }
 
+bool BacnetServer::IsActive() { return t_.joinable(); }
+
 void BacnetServer::Stop() {
     stop_ = true;
-    if (t_.joinable())
+    if (IsActive())
         t_.join();
 
     datalink_cleanup();

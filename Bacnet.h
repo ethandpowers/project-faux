@@ -13,6 +13,7 @@ class BacnetServer {
 
     void Start();
     void Stop();
+    bool IsActive();
 
   private:
     FieldMap &map_;

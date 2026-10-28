@@ -255,7 +255,7 @@ std::string ModbusServer::Port() { return port_; }
 
 void ModbusServer::Stop() {
     stop_ = true;
-    if (t_.joinable()) {
+    if (IsActive()) {
         t_.join();
     }
 }
