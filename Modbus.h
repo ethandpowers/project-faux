@@ -9,16 +9,19 @@
 #include <string>
 #include <thread>
 
+#define MAX_MODBUS_CONNECTIONS 10
+
 class ModbusServer {
   public:
     ModbusServer(FieldMap &map, std::string port = "502");
 
     ~ModbusServer();
 
-    void Start(unsigned int max_connections = 1);
+    void Start();
     void Stop();
     bool IsActive();
-    int MaxConnections();
+    int GetMaxConnections();
+    void SetMaxConnections(int conns);
     std::string Port();
 
   private:
@@ -27,7 +30,7 @@ class ModbusServer {
     modbus_mapping_t *modbus_mapping_ = nullptr;
     std::string port_;
     int socket_ = -1;
-    int nb_connections_ = 1;
+    int nb_connections_ = MAX_MODBUS_CONNECTIONS;
     std::thread t_;
     std::atomic<bool> stop_{false};
 

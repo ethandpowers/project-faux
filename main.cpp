@@ -22,6 +22,11 @@ int main(int argc, char *argv[]) {
         .default_value(false)
         .implicit_value(true);
 
+    program.add_argument("-mc", "--modbus-connections")
+        .help("Maximum allowed modbus connections")
+        .default_value(MAX_MODBUS_CONNECTIONS)
+        .scan<'i', int>();
+
     try {
         program.parse_args(argc, argv);
     } catch (const std::exception &err) {
@@ -33,11 +38,19 @@ int main(int argc, char *argv[]) {
     std::string map_path = program.get("field_map");
     bool is_modbus_enabled = program.get<bool>("-m");
     bool is_bacnet_enabled = program.get<bool>("-b");
+    int max_modbus_connections = program.get<int>("-mc");
 
     FieldMapParser parser;
     FieldMap map = parser.Parse(map_path);
 
     ModbusServer modbus(map);
+    try {
+        modbus.SetMaxConnections(max_modbus_connections);
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << "\n";
+        return 1;
+    }
+
     BacnetServer bacnet(map);
 
     if (is_modbus_enabled) {

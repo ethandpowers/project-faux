@@ -34,14 +34,13 @@ ModbusServer::~ModbusServer() {
         modbus_mapping_free(modbus_mapping_);
 }
 
-void ModbusServer::Start(unsigned int max_connections) {
+void ModbusServer::Start() {
     if (IsActive()) {
         std::cout << "Attempted to start modbus, but already running\n";
         return;
     }
 
     stop_ = false;
-    nb_connections_ = max_connections;
 
     socket_ = modbus_tcp_pi_listen(modbus_context_, nb_connections_);
 
@@ -242,7 +241,16 @@ void ModbusServer::PackUint32(std::uint32_t value, int start) {
 }
 
 bool ModbusServer::IsActive() { return t_.joinable(); }
-int ModbusServer::MaxConnections() { return nb_connections_; }
+
+int ModbusServer::GetMaxConnections() { return nb_connections_; }
+
+void ModbusServer::SetMaxConnections(int conns) {
+    if (conns <= 0)
+        throw std::invalid_argument("Max connections must be positive");
+
+    nb_connections_ = conns;
+}
+
 std::string ModbusServer::Port() { return port_; }
 
 void ModbusServer::Stop() {

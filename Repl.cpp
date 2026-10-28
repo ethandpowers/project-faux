@@ -18,54 +18,62 @@ static std::vector<std::string> Tokenize(const std::string &text) {
 
 class HelpCommand : public Command {
   public:
-    void Execute() override { std::cout << "No one can help you now\n"; }
+    void Execute() override {
+        std::cout << "Help me, Obi-Wan Kenobi.  You're my only hope.\n";
+    }
 };
 
 class ModbusCommand : public Command {
   public:
     ModbusCommand(ModbusServer &server, const std::vector<std::string> &args)
-        : server_(server) {
-        if (args.size() != 2)
-            throw std::runtime_error("Command \"modbus\" expects one of "
-                                     "\"start\", \"stop\", \"port\"");
-
-        if (args[1] == "start") {
-            subcommand_ = Subcommand::Start;
-        } else if (args[1] == "stop") {
-            subcommand_ = Subcommand::Stop;
-        } else if (args[1] == "port") {
-            subcommand_ = Subcommand::Port;
-        } else {
-            throw std::runtime_error("Unknown subcommand: " + args[1]);
-        }
+        : server_(server), args_(args) {
+        if (args.size() < 2)
+            throw std::runtime_error("Command \"modbus\" expects a subcommand");
     }
 
     void Execute() override {
-        switch (subcommand_) {
-        case Subcommand::Start:
+        if (args_[1] == "start") {
             if (server_.IsActive())
                 throw std::runtime_error("Modbus server already active on " +
                                          server_.Port());
 
-            server_.Start(server_.MaxConnections());
-            break;
-        case Subcommand::Stop:
+            server_.Start();
+        } else if (args_[1] == "stop") {
             if (!server_.IsActive())
                 throw std::runtime_error("Modbus server not active");
 
             server_.Stop();
-            break;
-        case Subcommand::Port:
-            std::cout << server_.Port() << "\n";
-            break;
+        } else if (args_[1] == "get") {
+            if (args_.size() < 3) {
+                throw std::runtime_error("Command \"get\" requires argument");
+            }
+            if (args_[2] == "port") {
+                std::cout << server_.Port() << "\n";
+            } else if (args_[2] == "max-connections") {
+                std::cout << server_.GetMaxConnections() << "\n";
+            } else {
+                throw std::runtime_error("Unknown property: " + args_[2]);
+            }
+        } else if (args_[1] == "set") {
+            if (args_.size() < 4) {
+                throw std::runtime_error(
+                    "Command \"set\" requires 2 arguments");
+            }
+
+            if (args_[2] == "max-connections") {
+                server_.SetMaxConnections(std::stoi(args_[3]));
+            } else {
+                throw std::runtime_error("Unknown property: " + args_[2]);
+            }
+
+        } else {
+            throw std::runtime_error("Unknown subcommand: " + args_[1]);
         }
     }
 
   private:
-    enum class Subcommand { Start, Stop, Port };
-
     ModbusServer &server_;
-    Subcommand subcommand_;
+    std::vector<std::string> args_;
 };
 
 Repl::Repl(ModbusServer &modbus, BacnetServer &bacnet)
