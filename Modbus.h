@@ -17,11 +17,15 @@ class ModbusServer {
 
     void Start(unsigned int max_connections = 1);
     void Stop();
+    bool IsActive();
+    int MaxConnections();
+    std::string Port();
 
   private:
     FieldMap &map_;
     modbus_t *modbus_context_ = nullptr;
     modbus_mapping_t *modbus_mapping_ = nullptr;
+    std::string port_;
     int socket_ = -1;
     int nb_connections_ = 1;
     std::thread t_;

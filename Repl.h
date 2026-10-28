@@ -4,6 +4,8 @@
 #include "Bacnet.h"
 #include "Modbus.h"
 #include <memory>
+#include <optional>
+#include <string>
 
 class Command {
   public:
@@ -20,8 +22,8 @@ class Repl {
     ModbusServer &modbus_;
     BacnetServer &bacnet_;
 
-    std::string AwaitCommand();
-    std::unique_ptr<Command> ParseCommand(std::string cmd);
+    std::optional<std::string> AwaitCommand();
+    std::unique_ptr<Command> ParseCommand(const std::string &cmd);
 };
 
 #endif // !H_REPL

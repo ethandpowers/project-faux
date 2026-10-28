@@ -16,7 +16,8 @@
 #include <unistd.h>
 #include <vector>
 
-ModbusServer::ModbusServer(FieldMap &map, std::string port) : map_(map) {
+ModbusServer::ModbusServer(FieldMap &map, std::string port)
+    : map_(map), port_(port) {
     modbus_context_ = modbus_new_tcp_pi(NULL, port.c_str());
     if (modbus_context_ == NULL)
         throw std::runtime_error("Failed to allocatate modbus context");
@@ -34,7 +35,7 @@ ModbusServer::~ModbusServer() {
 }
 
 void ModbusServer::Start(unsigned int max_connections) {
-    if (t_.joinable()) {
+    if (IsActive()) {
         std::cout << "Attempted to start modbus, but already running\n";
         return;
     }
@@ -45,7 +46,7 @@ void ModbusServer::Start(unsigned int max_connections) {
     socket_ = modbus_tcp_pi_listen(modbus_context_, nb_connections_);
 
     if (socket_ == -1)
-        throw std::runtime_error("Failed to bind modbus socket");
+        throw std::runtime_error("Failed to bind modbus socket on " + port_);
 
     t_ = std::thread([this]() { this->ServeContext(); });
 }
@@ -239,6 +240,10 @@ void ModbusServer::PackUint32(std::uint32_t value, int start) {
     modbus_mapping_->tab_registers[start + 1] = static_cast<std::uint16_t>(
         value); // Upper bits are truncated by the cast
 }
+
+bool ModbusServer::IsActive() { return t_.joinable(); }
+int ModbusServer::MaxConnections() { return nb_connections_; }
+std::string ModbusServer::Port() { return port_; }
 
 void ModbusServer::Stop() {
     stop_ = true;
