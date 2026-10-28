@@ -3,6 +3,8 @@
 #include "Modbus.h"
 #include "Repl.h"
 #include <argparse/argparse.hpp>
+#include <exception>
+#include <iostream>
 
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser program("faux");
@@ -40,15 +42,22 @@ int main(int argc, char *argv[]) {
 
     if (is_modbus_enabled) {
         std::cout << "Starting modbus server\n";
-        modbus.Start();
+        try {
+            modbus.Start();
+        } catch (std::exception &e) {
+            std::cerr << e.what() << "\n";
+        }
     }
 
     if (is_bacnet_enabled) {
         std::cout << "Starting BACnet server\n";
-        bacnet.Start();
+        try {
+            bacnet.Start();
+        } catch (std::exception &e) {
+            std::cerr << e.what() << "\n";
+        }
     }
 
-    std::cout << "Service(s) online\n";
     Repl repl(modbus, bacnet);
 
     repl.Operate();

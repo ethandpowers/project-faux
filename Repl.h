@@ -3,6 +3,13 @@
 
 #include "Bacnet.h"
 #include "Modbus.h"
+#include <memory>
+
+class Command {
+  public:
+    virtual void Execute() = 0;
+    virtual ~Command() = default;
+};
 
 class Repl {
   public:
@@ -14,6 +21,7 @@ class Repl {
     BacnetServer &bacnet_;
 
     std::string AwaitCommand();
+    std::unique_ptr<Command> ParseCommand(std::string cmd);
 };
 
 #endif // !H_REPL
