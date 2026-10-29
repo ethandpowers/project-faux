@@ -135,7 +135,49 @@ class FieldCommand : public Command {
             }
             throw std::runtime_error("No such field: " + name);
         } else if (args_[1] == "set") {
-            // TODO: Implement
+            if (args_.size() < 4)
+                throw std::runtime_error(
+                    "Subcommand \"set\" expects a field name and value");
+
+            std::string name = args_[2];
+            std::string value = args_[3];
+            for (Field &field : map_.fields) {
+                if (field.name == name) {
+                    // TODO: Set value
+                    switch (field.type) {
+                    case FieldType::String:
+                        field.value = value;
+                        break;
+                    case FieldType::Int16:
+                        field.value =
+                            static_cast<std::int16_t>(std::stoi(value));
+                        break;
+                    case FieldType::Int32:
+                        field.value = std::stoi(value);
+                        break;
+                    case FieldType::Uint16:
+                        field.value =
+                            static_cast<std::uint16_t>(std::stoi(value));
+                        break;
+                    case FieldType::Uint32:
+                        field.value =
+                            static_cast<std::uint32_t>(std::stoi(value));
+                        break;
+                    case FieldType::Float:
+                        field.value = std::stof(value);
+                        break;
+                    case FieldType::Double:
+                        field.value = std::stod(value);
+                        break;
+                    case FieldType::Bool:
+                        if (value != "false" && value != "true")
+                            throw std::runtime_error("Invalid boolean value");
+                        field.value = value == "true";
+                    }
+                    return;
+                }
+            }
+            throw std::runtime_error("No such field: " + name);
         } else {
             throw std::runtime_error("Unknown subcommand: " + args_[1]);
         }
