@@ -149,14 +149,13 @@ FieldMap FieldMapParser::Parse(std::string path) {
             // Validate that fields fit in said registers
             int num_registers = 1 + field.modbus.value().reg_end -
                                 field.modbus.value().reg_start;
-            int min_registers = (field_type_bytes(field.type) + 1) / 2;
+            int min_registers = (FieldTypeBytes(field.type) + 1) / 2;
 
             if (num_registers < min_registers) {
-                throw std::runtime_error("Invalid field map: Need at least " +
-                                         std::to_string(min_registers) +
-                                         " registers for type " +
-                                         field_type_to_string(field.type) +
-                                         " in field " + field.name);
+                throw std::runtime_error(
+                    "Invalid field map: Need at least " +
+                    std::to_string(min_registers) + " registers for type " +
+                    FieldTypeToString(field.type) + " in field " + field.name);
             }
         }
 
@@ -192,8 +191,8 @@ void FieldMap::Print() {
 
 void Field::Print() {
     std::cout << "Name: " << this->name << "\n";
-    std::cout << "Type: " << field_type_to_string(this->type) << "\n";
-    std::cout << "Default: " << field_value_to_string(this->value) << "\n";
+    std::cout << "Type: " << FieldTypeToString(this->type) << "\n";
+    std::cout << "Default: " << FieldValueToString(this->value) << "\n";
     if (this->modbus) {
         std::cout << "Modbus reg: " << this->modbus->reg_start << "-"
                   << this->modbus->reg_end << "\n";
@@ -206,7 +205,7 @@ void Field::Print() {
     std::cout << "\n";
 }
 
-int field_type_bytes(FieldType type) {
+int FieldTypeBytes(FieldType type) {
     switch (type) {
     case FieldType::String:
         return 1;
@@ -229,7 +228,7 @@ int field_type_bytes(FieldType type) {
     return 1;
 }
 
-std::string field_type_to_string(FieldType type) {
+std::string FieldTypeToString(FieldType type) {
     switch (type) {
     case FieldType::String:
         return "string";
@@ -252,7 +251,7 @@ std::string field_type_to_string(FieldType type) {
     return "unknown";
 }
 
-std::string field_value_to_string(FieldValue value) {
+std::string FieldValueToString(FieldValue value) {
     return std::visit(
         [](const auto &arg) -> std::string {
             using T = std::decay_t<decltype(arg)>;

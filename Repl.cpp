@@ -129,7 +129,7 @@ class FieldCommand : public Command {
             std::string name = args_[2];
             for (Field &field : map_.fields) {
                 if (field.name == name) {
-                    std::cout << field_value_to_string(field.value) << "\n";
+                    std::cout << FieldValueToString(field.value) << "\n";
                     return;
                 }
             }

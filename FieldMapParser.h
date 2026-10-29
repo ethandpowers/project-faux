@@ -61,8 +61,8 @@ class FieldMapParser {
     bool IsValidReg(int reg);
 };
 
-int field_type_bytes(FieldType type);
-std::string field_type_to_string(FieldType type);
-std::string field_value_to_string(FieldValue value);
+int FieldTypeBytes(FieldType type);
+std::string FieldTypeToString(FieldType type);
+std::string FieldValueToString(FieldValue value);
 
 #endif // !H_FIELD_MAP_PARSER

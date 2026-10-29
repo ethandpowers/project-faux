@@ -1,7 +1,5 @@
-#include "Bacnet.h"
-#include "FieldMapParser.h"
 #include "Modbus.h"
-#include "Repl.h"
+#include "Server.h"
 #include <argparse/argparse.hpp>
 #include <exception>
 #include <iostream>
@@ -9,23 +7,27 @@
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser program("faux");
 
-    program.add_argument("field_map")
+    argparse::ArgumentParser serve_command("serve");
+
+    serve_command.add_argument("field_map")
         .help("Supply the location of the field map");
 
-    program.add_argument("-m", "--modbus")
+    serve_command.add_argument("-m", "--modbus")
         .help("Turn on the modbus server")
         .default_value(false)
         .implicit_value(true);
 
-    program.add_argument("-b", "--bacnet")
+    serve_command.add_argument("-b", "--bacnet")
         .help("Turn on the BACnet server")
         .default_value(false)
         .implicit_value(true);
 
-    program.add_argument("-mc", "--modbus-connections")
+    serve_command.add_argument("-mc", "--modbus-connections")
         .help("Maximum allowed modbus connections")
         .default_value(MAX_MODBUS_CONNECTIONS)
         .scan<'i', int>();
+
+    program.add_subparser(serve_command);
 
     try {
         program.parse_args(argc, argv);
@@ -35,44 +37,24 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::string map_path = program.get("field_map");
-    bool is_modbus_enabled = program.get<bool>("-m");
-    bool is_bacnet_enabled = program.get<bool>("-b");
-    int max_modbus_connections = program.get<int>("-mc");
+    if (program.is_subcommand_used(serve_command)) {
+        ServerConfig config;
+        config.map_path = serve_command.get("field_map");
+        config.is_modbus_enabled = serve_command.get<bool>("-m");
+        config.is_bacnet_enabled = serve_command.get<bool>("-b");
+        config.max_modbus_connections = serve_command.get<int>("-mc");
 
-    FieldMapParser parser;
-    FieldMap map = parser.Parse(map_path);
-
-    ModbusServer modbus(map);
-    try {
-        modbus.SetMaxConnections(max_modbus_connections);
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << "\n";
-        return 1;
-    }
-
-    BacnetServer bacnet(map);
-
-    if (is_modbus_enabled) {
-        std::cout << "Starting modbus server\n";
         try {
-            modbus.Start();
-        } catch (std::exception &e) {
-            std::cerr << e.what() << "\n";
+            Server server(config);
+            server.Operate();
+            // If server returns, then continue as a client
+        } catch (const std::exception &err) {
+            std::cerr << err.what() << std::endl;
+            return 1;
         }
     }
-
-    if (is_bacnet_enabled) {
-        std::cout << "Starting BACnet server\n";
-        try {
-            bacnet.Start();
-        } catch (std::exception &e) {
-            std::cerr << e.what() << "\n";
-        }
-    }
-
-    Repl repl(map, modbus, bacnet);
-    repl.Operate();
+    // Repl repl(map, modbus, bacnet);
+    // repl.Operate();
 
     return 0;
 }
