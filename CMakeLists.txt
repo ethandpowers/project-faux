@@ -8,11 +8,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(faux main.cpp FieldMapParser.cpp Modbus.cpp Bacnet.cpp Repl.cpp)
 
-find_package(yaml-cpp REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBMODBUS REQUIRED IMPORTED_TARGET libmodbus)
-
 include(FetchContent)
+
+FetchContent_Declare(
+    yaml-cpp
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+    GIT_TAG        yaml-cpp-0.9.0
+)
+
+FetchContent_MakeAvailable(yaml-cpp)
 
 FetchContent_Declare(
   bacnet-stack

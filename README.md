@@ -17,8 +17,11 @@ My basic requirements are this:
 ## Dependencies
 
 - yaml-cpp
-- libmodbus
+- libmodbus (install via system package manager)
+- bacnet-stack
+- argparse
 
-> [!NOTE] This uses zero-based registers across the board, so the field map and
+> [!NOTE]
+> This uses zero-based registers across the board, so the field map and
 > request register numbers must match.  All multi-register types are
 > represented in big-endian format.
