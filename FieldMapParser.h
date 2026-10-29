@@ -41,6 +41,8 @@ struct Field {
     FieldValue value;
     std::optional<ModbusOpts> modbus;
     std::optional<BacnetOpts> bacnet;
+
+    void Print();
 };
 
 struct FieldMap {

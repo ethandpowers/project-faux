@@ -1,9 +1,11 @@
 #include "Repl.h"
 #include "Bacnet.h"
+#include "FieldMapParser.h"
 #include "Modbus.h"
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -104,8 +106,48 @@ class BacnetCommand : public Command {
     std::vector<std::string> args_;
 };
 
-Repl::Repl(ModbusServer &modbus, BacnetServer &bacnet)
-    : modbus_(modbus), bacnet_(bacnet) {}
+class FieldCommand : public Command {
+  public:
+    FieldCommand(FieldMap &map, const std::vector<std::string> &args)
+        : map_(map), args_(args) {
+        if (args.size() < 2)
+            throw std::runtime_error("Command \"field\" expects a subcommand");
+    }
+
+    void Execute() override {
+        std::lock_guard<std::mutex> lock(*map_.mutex);
+
+        if (args_[1] == "list") {
+            for (Field &field : map_.fields) {
+                field.Print();
+            }
+        } else if (args_[1] == "get") {
+            if (args_.size() < 3)
+                throw std::runtime_error(
+                    "Subcommand \"get\" expects a field name");
+
+            std::string name = args_[2];
+            for (Field &field : map_.fields) {
+                if (field.name == name) {
+                    std::cout << field_value_to_string(field.value) << "\n";
+                    return;
+                }
+            }
+            throw std::runtime_error("No such field: " + name);
+        } else if (args_[1] == "set") {
+            // TODO: Implement
+        } else {
+            throw std::runtime_error("Unknown subcommand: " + args_[1]);
+        }
+    }
+
+  private:
+    FieldMap &map_;
+    std::vector<std::string> args_;
+};
+
+Repl::Repl(FieldMap &map, ModbusServer &modbus, BacnetServer &bacnet)
+    : map_(map), modbus_(modbus), bacnet_(bacnet) {}
 
 void Repl::Operate() {
     std::cout << "Welcome to the repl!  Enter \"help\" for assistance.\n";
@@ -144,6 +186,8 @@ std::unique_ptr<Command> Repl::ParseCommand(const std::string &cmd) {
         return std::make_unique<ModbusCommand>(modbus_, args);
     } else if (args[0] == "bacnet") {
         return std::make_unique<BacnetCommand>(bacnet_, args);
+    } else if (args[0] == "field") {
+        return std::make_unique<FieldCommand>(map_, args);
     }
 
     throw std::runtime_error("Unknown command: " + args[0]);

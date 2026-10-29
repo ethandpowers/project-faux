@@ -2,6 +2,7 @@
 #define H_REPL
 
 #include "Bacnet.h"
+#include "FieldMapParser.h"
 #include "Modbus.h"
 #include <memory>
 #include <optional>
@@ -15,10 +16,11 @@ class Command {
 
 class Repl {
   public:
-    Repl(ModbusServer &modbus, BacnetServer &bacnet);
+    Repl(FieldMap &map, ModbusServer &modbus, BacnetServer &bacnet);
     void Operate();
 
   private:
+    FieldMap &map_;
     ModbusServer &modbus_;
     BacnetServer &bacnet_;
 

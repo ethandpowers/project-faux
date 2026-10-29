@@ -71,8 +71,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    Repl repl(modbus, bacnet);
-
+    Repl repl(map, modbus, bacnet);
     repl.Operate();
 
     return 0;

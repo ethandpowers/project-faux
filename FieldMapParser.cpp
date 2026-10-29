@@ -186,20 +186,24 @@ void FieldMap::Print() {
 
     std::cout << "Fields:\n";
     for (Field &field : this->fields) {
-        std::cout << "Name: " << field.name << "\n";
-        std::cout << "Type: " << field_type_to_string(field.type) << "\n";
-        std::cout << "Default: " << field_value_to_string(field.value) << "\n";
-        if (field.modbus) {
-            std::cout << "Modbus reg: " << field.modbus->reg_start << "-"
-                      << field.modbus->reg_end << "\n";
-        }
-
-        if (field.bacnet) {
-            std::cout << "BACnet instance: " << field.bacnet->instance << "\n";
-        }
-
-        std::cout << "\n";
+        field.Print();
     }
+}
+
+void Field::Print() {
+    std::cout << "Name: " << this->name << "\n";
+    std::cout << "Type: " << field_type_to_string(this->type) << "\n";
+    std::cout << "Default: " << field_value_to_string(this->value) << "\n";
+    if (this->modbus) {
+        std::cout << "Modbus reg: " << this->modbus->reg_start << "-"
+                  << this->modbus->reg_end << "\n";
+    }
+
+    if (this->bacnet) {
+        std::cout << "BACnet instance: " << this->bacnet->instance << "\n";
+    }
+
+    std::cout << "\n";
 }
 
 int field_type_bytes(FieldType type) {
