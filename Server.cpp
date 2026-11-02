@@ -52,12 +52,19 @@ static void StartTCPServer() {
 
     std::cout << "Listening on " << port << "\n";
 
+    const int max_command_len = 1024;
     const int max_connections = 10;
     std::vector<Client> clients(max_connections);
     std::vector<pollfd> pollfds(max_connections + 1, pollfd{-1, POLLIN, 0});
     pollfds[0].fd = server_socket;
 
-    char buffer[1024];
+    char buffer[512];
+
+    auto close_client = [&](int i) {
+        close(pollfds[i].fd);
+        pollfds[i].fd = -1;
+        clients[i - 1].input.clear();
+    };
 
     while (true) {
         int result = poll(pollfds.data(), pollfds.size(), 100);
@@ -112,17 +119,14 @@ static void StartTCPServer() {
 
             if (p.revents & (POLLHUP | POLLERR | POLLNVAL)) {
                 std::cout << "Closing connection\n";
-                close(p.fd);
-                p.fd = -1;
+                close_client(i);
                 continue;
             }
 
             if (!(p.revents & POLLIN))
                 continue;
 
-            std::memset(buffer, 0, sizeof(buffer));
-
-            ssize_t bytes_received = recv(p.fd, &buffer, sizeof(buffer) - 1, 0);
+            ssize_t bytes_received = recv(p.fd, &buffer, sizeof(buffer), 0);
 
             if (bytes_received == -1) {
                 std::cerr << "Receive error\n";
@@ -130,13 +134,35 @@ static void StartTCPServer() {
             }
 
             if (bytes_received == 0) {
-                close(p.fd);
-                p.fd = -1;
+                std::cout << "Client close connection.\n";
+                close_client(i);
                 continue;
             }
 
-            std::cout << buffer << "\n";
-            send(p.fd, buffer, bytes_received, 0);
+            std::string &input = clients[i - 1].input;
+            size_t search_from = input.size();
+            input.append(buffer, bytes_received);
+
+            size_t line_start = 0;
+            size_t newline;
+            while ((newline = input.find('\n', search_from)) !=
+                   std::string::npos) {
+                std::string command =
+                    input.substr(line_start, newline - line_start);
+                line_start = newline + 1;
+                search_from = line_start;
+
+                std::string reply = command + "\n";
+                send(p.fd, reply.data(), reply.size(), MSG_NOSIGNAL);
+            }
+            input.erase(0, line_start);
+
+            if (input.size() > max_command_len) {
+                std::cerr << "Command too long.  Closing connection.\n";
+                std::string reply = "Command is too long";
+                send(p.fd, reply.data(), reply.size(), MSG_NOSIGNAL);
+                close_client(i);
+            }
         }
     }
 
