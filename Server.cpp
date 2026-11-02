@@ -1,11 +1,13 @@
 #include "Server.h"
 #include "Bacnet.h"
+#include "CommandParser.h"
 #include "FieldMapParser.h"
 #include "Modbus.h"
 #include <cerrno>
 #include <cstring>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <stdexcept>
@@ -25,8 +27,43 @@ struct Client {
     std::string input;
 };
 
-static void StartTCPServer() {
-    int port = 1492;
+void Server::Operate() {
+    FieldMapParser parser;
+    FieldMap map = parser.Parse(config_.map_path);
+
+    ModbusServer modbus(map);
+    modbus.SetMaxConnections(config_.max_modbus_connections);
+
+    BacnetServer bacnet(map);
+
+    if (config_.is_modbus_enabled) {
+        std::cout << "Starting modbus server\n";
+        try {
+            modbus.Start();
+        } catch (std::exception &e) {
+            std::cerr << e.what() << "\n";
+        }
+    }
+
+    if (config_.is_bacnet_enabled) {
+        std::cout << "Starting BACnet server\n";
+        try {
+            bacnet.Start();
+        } catch (std::exception &e) {
+            std::cerr << e.what() << "\n";
+        }
+    }
+
+    CommandParser cmd_parser(map, modbus, bacnet);
+
+    AcceptTCPRequests(cmd_parser);
+
+    std::cout << "Shutting down\n";
+    modbus.Stop();
+    bacnet.Stop();
+}
+
+void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1)
         throw std::runtime_error("Failed to create socket.");
@@ -52,8 +89,6 @@ static void StartTCPServer() {
 
     std::cout << "Listening on " << port << "\n";
 
-    const int max_command_len = 1024;
-    const int max_connections = 10;
     std::vector<Client> clients(max_connections);
     std::vector<pollfd> pollfds(max_connections + 1, pollfd{-1, POLLIN, 0});
     pollfds[0].fd = server_socket;
@@ -147,12 +182,25 @@ static void StartTCPServer() {
             size_t newline;
             while ((newline = input.find('\n', search_from)) !=
                    std::string::npos) {
-                std::string command =
+                std::string command_str =
                     input.substr(line_start, newline - line_start);
                 line_start = newline + 1;
                 search_from = line_start;
 
-                std::string reply = command + "\n";
+                std::string reply;
+                try {
+                    if (std::unique_ptr<Command> command =
+                            cmd_parser.ParseCommand(command_str)) {
+                        std::optional<std::string> out = command->Execute();
+                        if (out) {
+                            reply = out.value();
+                        }
+                    }
+                } catch (const std::exception &err) {
+                    reply = err.what();
+                }
+                reply.append("\n");
+
                 send(p.fd, reply.data(), reply.size(), MSG_NOSIGNAL);
             }
             input.erase(0, line_start);
@@ -173,38 +221,4 @@ static void StartTCPServer() {
             sock = -1;
         }
     }
-}
-
-void Server::Operate() {
-    FieldMapParser parser;
-    FieldMap map = parser.Parse(config_.map_path);
-
-    ModbusServer modbus(map);
-    modbus.SetMaxConnections(config_.max_modbus_connections);
-
-    BacnetServer bacnet(map);
-
-    if (config_.is_modbus_enabled) {
-        std::cout << "Starting modbus server\n";
-        try {
-            modbus.Start();
-        } catch (std::exception &e) {
-            std::cerr << e.what() << "\n";
-        }
-    }
-
-    if (config_.is_bacnet_enabled) {
-        std::cout << "Starting BACnet server\n";
-        try {
-            bacnet.Start();
-        } catch (std::exception &e) {
-            std::cerr << e.what() << "\n";
-        }
-    }
-
-    StartTCPServer();
-
-    std::cout << "Shutting down\n";
-    modbus.Stop();
-    bacnet.Stop();
 }

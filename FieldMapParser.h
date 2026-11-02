@@ -42,7 +42,7 @@ struct Field {
     std::optional<ModbusOpts> modbus;
     std::optional<BacnetOpts> bacnet;
 
-    void Print();
+    std::string ToString();
 };
 
 struct FieldMap {

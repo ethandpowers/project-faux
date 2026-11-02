@@ -4,15 +4,8 @@
 #include "Bacnet.h"
 #include "FieldMapParser.h"
 #include "Modbus.h"
-#include <memory>
 #include <optional>
 #include <string>
-
-class Command {
-  public:
-    virtual void Execute() = 0;
-    virtual ~Command() = default;
-};
 
 class Repl {
   public:
@@ -25,7 +18,6 @@ class Repl {
     BacnetServer &bacnet_;
 
     std::optional<std::string> AwaitCommand();
-    std::unique_ptr<Command> ParseCommand(const std::string &cmd);
 };
 
 #endif // !H_REPL
