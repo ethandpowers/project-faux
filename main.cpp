@@ -7,6 +7,7 @@
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser program("faux");
 
+    // Add server arguments
     argparse::ArgumentParser serve_command("serve");
 
     serve_command.add_argument("field_map")
@@ -47,7 +48,6 @@ int main(int argc, char *argv[]) {
         try {
             Server server(config);
             server.Operate();
-            // If server returns, then continue as a client
         } catch (const std::exception &err) {
             std::cerr << err.what() << std::endl;
             return 1;
