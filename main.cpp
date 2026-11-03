@@ -58,6 +58,15 @@ int main(int argc, char *argv[]) {
 
     program.add_subparser(serve_command);
 
+    // Add client arguments
+    program.add_argument("-s", "--server")
+        .help("Target server for client")
+        .default_value("localhost");
+
+    program.add_argument("command")
+        .help("Command to pass to the server")
+        .remaining();
+
     try {
         program.parse_args(argc, argv);
     } catch (const std::exception &err) {
@@ -68,6 +77,8 @@ int main(int argc, char *argv[]) {
 
     InstallSignalHandlers();
 
+    int port = program.get<int>("-p");
+
     if (program.is_subcommand_used(serve_command)) {
         ServerConfig config;
         config.map_path = serve_command.get("field_map");
@@ -75,7 +86,7 @@ int main(int argc, char *argv[]) {
         config.is_bacnet_enabled = serve_command.get<bool>("-b");
         config.max_modbus_connections = serve_command.get<int>("-mc");
         config.modbus_port = serve_command.get<int>("-mp");
-        config.port = program.get<int>("-p");
+        config.port = port;
 
         try {
             Server server(config, g_stop);
@@ -85,6 +96,27 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     } else {
+        // TODO: Implement client
+        std::string server = program.get("-s");
+
+        if (!program.present("command")) {
+            std::cerr << "No command provided\n";
+            return 1;
+        }
+
+        std::vector<std::string> rest =
+            program.get<std::vector<std::string>>("command");
+
+        std::string command;
+
+        for (int i = 0; i < rest.size(); i++) {
+            command += rest[i];
+            if (i < rest.size() - 1) {
+                command += " ";
+            }
+        }
+
+        std::cout << server << ":" << port << " -> " << command << "\n";
     }
 
     return 0;
