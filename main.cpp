@@ -24,6 +24,12 @@ void InstallSignalHandlers() {
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser program("faux");
 
+    // Shared argument
+    program.add_argument("-p", "--port")
+        .help("Specify server port")
+        .default_value(1492)
+        .scan<'i', int>();
+
     // Add server arguments
     argparse::ArgumentParser serve_command("serve");
 
@@ -46,8 +52,9 @@ int main(int argc, char *argv[]) {
         .scan<'i', int>();
 
     serve_command.add_argument("-mp", "--modbus-port")
-        .help("Specify the port/service for modbus")
-        .default_value("502");
+        .help("Specify the port for modbus")
+        .default_value(502)
+        .scan<'i', int>();
 
     program.add_subparser(serve_command);
 
@@ -67,7 +74,8 @@ int main(int argc, char *argv[]) {
         config.is_modbus_enabled = serve_command.get<bool>("-m");
         config.is_bacnet_enabled = serve_command.get<bool>("-b");
         config.max_modbus_connections = serve_command.get<int>("-mc");
-        config.modbus_port = serve_command.get("-mp");
+        config.modbus_port = serve_command.get<int>("-mp");
+        config.port = program.get<int>("-p");
 
         try {
             Server server(config, g_stop);
@@ -76,9 +84,8 @@ int main(int argc, char *argv[]) {
             std::cerr << err.what() << std::endl;
             return 1;
         }
+    } else {
     }
-    // Repl repl(map, modbus, bacnet);
-    // repl.Operate();
 
     return 0;
 }

@@ -11,15 +11,14 @@ struct ServerConfig {
     bool is_modbus_enabled = false;
     bool is_bacnet_enabled = false;
     int max_modbus_connections = MAX_MODBUS_CONNECTIONS;
-    std::string modbus_port;
+    int modbus_port;
+    int port;
 };
 
 class Server {
   public:
     const int max_command_len = 1024;
     const int max_connections = 10;
-
-    int port = 1492;
 
     Server(ServerConfig config, const std::atomic<bool> &stop);
     void Operate();

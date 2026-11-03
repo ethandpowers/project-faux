@@ -32,7 +32,7 @@ void Server::Operate() {
     FieldMapParser parser;
     FieldMap map = parser.Parse(config_.map_path);
 
-    ModbusServer modbus(map, config_.modbus_port);
+    ModbusServer modbus(map, std::to_string(config_.modbus_port));
     modbus.SetMaxConnections(config_.max_modbus_connections);
 
     BacnetServer bacnet(map);
@@ -75,7 +75,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
     sockaddr_in server_address{};
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = INADDR_ANY;
-    server_address.sin_port = htons(port);
+    server_address.sin_port = htons(config_.port);
 
     if (bind(server_socket, (sockaddr *)&server_address,
              sizeof(server_address))) {
@@ -88,7 +88,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
         throw std::runtime_error("Failed to listen on socket.");
     }
 
-    std::cout << "Listening on " << port << "\n";
+    std::cout << "Listening on " << config_.port << "\n";
 
     std::vector<Client> clients(max_connections);
     std::vector<pollfd> pollfds(max_connections + 1, pollfd{-1, POLLIN, 0});
