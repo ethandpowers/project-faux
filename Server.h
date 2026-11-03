@@ -3,6 +3,7 @@
 
 #include "CommandParser.h"
 #include "Modbus.h"
+#include <atomic>
 #include <string>
 
 struct ServerConfig {
@@ -20,11 +21,12 @@ class Server {
 
     int port = 1492;
 
-    explicit Server(ServerConfig config);
+    Server(ServerConfig config, const std::atomic<bool> &stop);
     void Operate();
 
   private:
     ServerConfig config_;
+    const std::atomic<bool> &stop_;
 
     void AcceptTCPRequests(CommandParser &cmd_parser);
 };

@@ -19,7 +19,8 @@
 #include <utility>
 #include <vector>
 
-Server::Server(ServerConfig config) : config_(std::move(config)) {}
+Server::Server(ServerConfig config, const std::atomic<bool> &stop)
+    : config_(std::move(config)), stop_(stop) {}
 
 struct Client {
     sockaddr_in client_address;
@@ -101,7 +102,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
         clients[i - 1].input.clear();
     };
 
-    while (true) {
+    while (!stop_.load()) {
         int result = poll(pollfds.data(), pollfds.size(), 100);
         if (result == -1) {
             if (errno == EINTR)

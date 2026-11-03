@@ -1,8 +1,25 @@
 #include "Modbus.h"
 #include "Server.h"
 #include <argparse/argparse.hpp>
+#include <atomic>
+#include <csignal>
 #include <exception>
 #include <iostream>
+
+namespace {
+std::atomic<bool> g_stop{false};
+static_assert(std::atomic<bool>::is_always_lock_free);
+
+void HandleSignal(int) { g_stop.store(true); }
+
+void InstallSignalHandlers() {
+    struct sigaction sa{};
+    sa.sa_handler = HandleSignal;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, nullptr);
+    sigaction(SIGTERM, &sa, nullptr);
+}
+} // namespace
 
 int main(int argc, char *argv[]) {
     argparse::ArgumentParser program("faux");
@@ -42,6 +59,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    InstallSignalHandlers();
+
     if (program.is_subcommand_used(serve_command)) {
         ServerConfig config;
         config.map_path = serve_command.get("field_map");
@@ -51,7 +70,7 @@ int main(int argc, char *argv[]) {
         config.modbus_port = serve_command.get("-mp");
 
         try {
-            Server server(config);
+            Server server(config, g_stop);
             server.Operate();
         } catch (const std::exception &err) {
             std::cerr << err.what() << std::endl;
