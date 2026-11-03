@@ -10,6 +10,7 @@ struct ServerConfig {
     bool is_modbus_enabled = false;
     bool is_bacnet_enabled = false;
     int max_modbus_connections = MAX_MODBUS_CONNECTIONS;
+    std::string modbus_port;
 };
 
 class Server {

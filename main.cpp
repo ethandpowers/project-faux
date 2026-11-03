@@ -28,6 +28,10 @@ int main(int argc, char *argv[]) {
         .default_value(MAX_MODBUS_CONNECTIONS)
         .scan<'i', int>();
 
+    serve_command.add_argument("-mp", "--modbus-port")
+        .help("Specify the port/service for modbus")
+        .default_value("502");
+
     program.add_subparser(serve_command);
 
     try {
@@ -44,6 +48,7 @@ int main(int argc, char *argv[]) {
         config.is_modbus_enabled = serve_command.get<bool>("-m");
         config.is_bacnet_enabled = serve_command.get<bool>("-b");
         config.max_modbus_connections = serve_command.get<int>("-mc");
+        config.modbus_port = serve_command.get("-mp");
 
         try {
             Server server(config);

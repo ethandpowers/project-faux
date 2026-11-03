@@ -13,7 +13,7 @@
 
 class ModbusServer {
   public:
-    ModbusServer(FieldMap &map, std::string port = "502");
+    ModbusServer(FieldMap &map, std::string port);
 
     ~ModbusServer();
 

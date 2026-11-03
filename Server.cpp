@@ -31,7 +31,7 @@ void Server::Operate() {
     FieldMapParser parser;
     FieldMap map = parser.Parse(config_.map_path);
 
-    ModbusServer modbus(map);
+    ModbusServer modbus(map, config_.modbus_port);
     modbus.SetMaxConnections(config_.max_modbus_connections);
 
     BacnetServer bacnet(map);
