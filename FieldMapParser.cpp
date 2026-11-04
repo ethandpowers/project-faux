@@ -42,7 +42,7 @@ FieldMap FieldMapParser::Parse(std::string path) {
             "Invalid field map: Expected fields to be a sequence");
     }
 
-    for (int i = 0; i < input["fields"].size(); i++) {
+    for (unsigned int i = 0; i < input["fields"].size(); i++) {
         Field field;
         YAML::Node fieldYaml = input["fields"][i];
 

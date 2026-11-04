@@ -95,7 +95,7 @@ void ModbusServer::ServeContext() {
         }
 
         // Respond to requests
-        for (int i = 1; i < pollfds.size(); i++) {
+        for (unsigned int i = 1; i < pollfds.size(); i++) {
             pollfd &p = pollfds[i];
             if (p.fd == -1 || p.revents == 0)
                 continue;
@@ -132,7 +132,7 @@ void ModbusServer::ServeContext() {
         }
     }
 
-    for (int i = 0; i < pollfds.size(); i++) {
+    for (unsigned int i = 0; i < pollfds.size(); i++) {
         int &sock = pollfds[i].fd;
         if (sock != -1) {
             close(sock);

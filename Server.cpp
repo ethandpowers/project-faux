@@ -121,7 +121,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
         if (pollfds[0].revents & POLLIN) {
             std::cout << "Incoming connection\n";
             int fd_index = -1;
-            for (int i = 1; i <= max_connections; i++) {
+            for (unsigned int i = 1; i <= max_connections; i++) {
                 if (pollfds[i].fd == -1) {
                     fd_index = i;
                     break;
@@ -150,7 +150,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
         }
 
         // Respond to requests
-        for (int i = 1; i < pollfds.size(); i++) {
+        for (unsigned int i = 1; i < pollfds.size(); i++) {
             pollfd &p = pollfds[i];
             if (p.fd == -1 || p.revents == 0)
                 continue;
@@ -217,7 +217,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
         }
     }
 
-    for (int i = 0; i < pollfds.size(); i++) {
+    for (unsigned int i = 0; i < pollfds.size(); i++) {
         int &sock = pollfds[i].fd;
         if (sock != -1) {
             close(sock);

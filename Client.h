@@ -17,7 +17,7 @@ struct ClientConfig {
 
 class Client {
   public:
-    const int max_response_len = 1024;
+    const unsigned int max_response_len = 1024;
 
     Client(ClientConfig config, const std::atomic<bool> &stop);
     void Operate();

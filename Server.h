@@ -17,8 +17,8 @@ struct ServerConfig {
 
 class Server {
   public:
-    const int max_command_len = 1024;
-    const int max_connections = 10;
+    const unsigned int max_command_len = 1024;
+    const unsigned int max_connections = 10;
 
     Server(ServerConfig config, const std::atomic<bool> &stop);
     void Operate();

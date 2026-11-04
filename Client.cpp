@@ -28,7 +28,7 @@ std::string ClientConfig::ServerStr() {
 }
 
 Client::Client(ClientConfig config, const std::atomic<bool> &stop)
-    : config_(config), stop_(stop) {};
+    : stop_(stop), config_(config) {};
 
 void Client::Operate() {
     if (config_.is_repl) {
