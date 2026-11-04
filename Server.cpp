@@ -200,7 +200,7 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
                         }
                     }
                 } catch (const std::exception &err) {
-                    reply = err.what();
+                    reply = std::string("Error: ") + err.what();
                 }
                 reply.append("\n");
 

@@ -8,6 +8,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <io.h>
+#define IS_A_TTY _isatty
+#define FILENO _fileno
+#else
+#include <unistd.h>
+#define IS_A_TTY isatty
+#define FILENO fileno
+#endif
+
+#define ANSI_RED_TEXT "\033[31m"
+
+#define ANSI_RESET "\033[0m"
+
 std::string ClientConfig::ServerStr() {
     return this->server + ":" + std::to_string(this->port);
 }
@@ -65,7 +79,11 @@ void Client::SendCommand() {
         response.append(buffer, bytes_received);
     }
 
-    std::cout << response;
+    if (IS_A_TTY(FILENO(stdout)) && response.starts_with("Error: ")) {
+        std::cout << ANSI_RED_TEXT << response << ANSI_RESET;
+    } else {
+        std::cout << response;
+    }
 
     close(server_socket);
 }
