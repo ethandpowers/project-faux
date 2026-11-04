@@ -1,0 +1,116 @@
+# 3-phase revenue-grade power meter on the main switchboard (480Y/277V).
+# Modbus TCP only. Float32 block layout modelled after common meters that
+# put instantaneous readings in the 3000 range and energy in the 3200 range.
+name: main_power_meter
+modbus_device_id: 1
+fields:
+  - name: model
+    type: string
+    default: EM-3P-480
+    modbus:
+      start: 0
+      end: 9
+  - name: serial_number
+    type: uint32
+    default: 21044873
+    modbus:
+      start: 128
+      end: 129
+  - name: firmware_version
+    type: string
+    default: "2.6.4"
+    modbus:
+      start: 130
+      end: 133
+
+  # Currents (A)
+  - name: current_a
+    type: float
+    default: 121.4
+    modbus: { start: 3000, end: 3001 }
+  - name: current_b
+    type: float
+    default: 118.9
+    modbus: { start: 3002, end: 3003 }
+  - name: current_c
+    type: float
+    default: 123.0
+    modbus: { start: 3004, end: 3005 }
+  - name: current_neutral
+    type: float
+    default: 6.2
+    modbus: { start: 3006, end: 3007 }
+  - name: current_avg
+    type: float
+    default: 121.1
+    modbus: { start: 3010, end: 3011 }
+
+  # Voltages (V)
+  - name: voltage_ab
+    type: float
+    default: 481.2
+    modbus: { start: 3020, end: 3021 }
+  - name: voltage_bc
+    type: float
+    default: 479.6
+    modbus: { start: 3022, end: 3023 }
+  - name: voltage_ca
+    type: float
+    default: 480.8
+    modbus: { start: 3024, end: 3025 }
+  - name: voltage_ll_avg
+    type: float
+    default: 480.5
+    modbus: { start: 3026, end: 3027 }
+  - name: voltage_an
+    type: float
+    default: 277.8
+    modbus: { start: 3028, end: 3029 }
+  - name: voltage_bn
+    type: float
+    default: 276.9
+    modbus: { start: 3030, end: 3031 }
+  - name: voltage_cn
+    type: float
+    default: 277.4
+    modbus: { start: 3032, end: 3033 }
+  - name: voltage_ln_avg
+    type: float
+    default: 277.4
+    modbus: { start: 3036, end: 3037 }
+
+  # Power
+  - name: real_power_total_kw
+    type: float
+    default: 92.7
+    modbus: { start: 3060, end: 3061 }
+  - name: reactive_power_total_kvar
+    type: float
+    default: 39.5
+    modbus: { start: 3068, end: 3069 }
+  - name: apparent_power_total_kva
+    type: float
+    default: 100.8
+    modbus: { start: 3076, end: 3077 }
+  - name: power_factor_total
+    type: float
+    default: 0.92
+    modbus: { start: 3084, end: 3085 }
+  - name: frequency_hz
+    type: float
+    default: 60.01
+    modbus: { start: 3110, end: 3111 }
+  - name: peak_demand_kw
+    type: float
+    default: 148.3
+    modbus: { start: 3140, end: 3141 }
+
+  # Accumulated energy (kWh)
+  - name: energy_delivered_kwh
+    type: double
+    default: 1843276.4
+    modbus: { start: 3204, end: 3207 }
+  - name: energy_received_kwh
+    type: double
+    default: 0
+    modbus: { start: 3208, end: 3211 }

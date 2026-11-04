@@ -1,0 +1,93 @@
+# Simulated building network: one faux server per device, all on one bridge
+# network so BACnet/IP broadcasts (Who-Is / I-Am) reach every device.
+#
+# Inside the network every device uses the standard ports:
+#   Modbus TCP 502, BACnet/IP UDP 47808, faux control 1492
+#
+# From the host:
+#   Modbus:  localhost:5021-5024 (see each service)
+#   Control: faux -p 14921 <command>   (14921-14926, see each service)
+#   BACnet:  not published. BACnet/IP relies on broadcasts and on devices
+#            replying to the sender's UDP port, which doesn't survive NAT.
+#            Run BACnet clients on the faux_net network instead, e.g.
+#            docker run --rm -it --network project-faux_faux_net <image>
+
+x-faux: &faux
+  build: .
+  image: faux:latest
+  restart: unless-stopped
+  environment:
+    BACNET_IFACE: eth0
+    BACNET_IP_PORT: "47808"
+
+services:
+  main_power_meter:
+    <<: *faux
+    hostname: main_power_meter
+    command: ["faux", "serve", "maps/main_power_meter.yaml", "-m"]
+    ports:
+      - "5021:502"
+      - "14921:1492"
+    networks:
+      faux_net:
+        ipv4_address: 172.28.0.11
+
+  ahu1_supply_fan_vfd:
+    <<: *faux
+    hostname: ahu1_supply_fan_vfd
+    command: ["faux", "serve", "maps/ahu1_supply_fan_vfd.yaml", "-m"]
+    ports:
+      - "5022:502"
+      - "14922:1492"
+    networks:
+      faux_net:
+        ipv4_address: 172.28.0.12
+
+  ahu1_controller:
+    <<: *faux
+    hostname: ahu1_controller
+    command: ["faux", "serve", "maps/ahu1_controller.yaml", "-b"]
+    ports:
+      - "14923:1492"
+    networks:
+      faux_net:
+        ipv4_address: 172.28.0.13
+
+  chiller1:
+    <<: *faux
+    hostname: chiller1
+    command: ["faux", "serve", "maps/chiller1.yaml", "-m", "-b"]
+    ports:
+      - "5023:502"
+      - "14924:1492"
+    networks:
+      faux_net:
+        ipv4_address: 172.28.0.14
+
+  vav_2_14:
+    <<: *faux
+    hostname: vav_2_14
+    command: ["faux", "serve", "maps/vav_2_14.yaml", "-b"]
+    ports:
+      - "14925:1492"
+    networks:
+      faux_net:
+        ipv4_address: 172.28.0.15
+
+  boiler1:
+    <<: *faux
+    hostname: boiler1
+    command: ["faux", "serve", "maps/boiler1.yaml", "-m"]
+    ports:
+      - "5024:502"
+      - "14926:1492"
+    networks:
+      faux_net:
+        ipv4_address: 172.28.0.16
+
+networks:
+  faux_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24

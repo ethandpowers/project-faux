@@ -1,0 +1,81 @@
+# Condensing hot water boiler (2,000 MBH) supplying the reheat and preheat
+# loop. Modbus TCP only, with scaled 16-bit integers as most boiler controls
+# use: "_x10" fields are tenths (1782 = 178.2 °F).
+name: boiler1
+modbus_device_id: 4
+fields:
+  # Temperatures (°F x10)
+  - name: supply_temp_x10
+    type: int16
+    default: 1782
+    modbus: 0
+  - name: return_temp_x10
+    type: int16
+    default: 1594
+    modbus: 1
+  - name: supply_temp_sp_x10
+    type: int16
+    default: 1800
+    modbus: 2
+  - name: outdoor_temp_x10
+    type: int16
+    default: 542
+    modbus: 3
+  - name: flue_temp_x10
+    type: int16
+    default: 1685
+    modbus: 4
+
+  # Combustion
+  - name: firing_rate_pct
+    type: uint16
+    default: 47
+    modbus: 5
+  - name: flame_signal_ua_x10
+    type: uint16
+    default: 82
+    modbus: 6
+
+  # Status
+  - name: enabled
+    type: bool
+    default: true
+    modbus: 10
+  - name: burner_on
+    type: bool
+    default: true
+    modbus: 11
+  - name: flame_proven
+    type: bool
+    default: true
+    modbus: 12
+  - name: pump_running
+    type: bool
+    default: true
+    modbus: 13
+  - name: locked_out
+    type: bool
+    default: false
+    modbus: 14
+  - name: low_water_cutoff
+    type: bool
+    default: false
+    modbus: 15
+
+  # Codes and counters
+  - name: operating_state       # 0 = standby, 1 = prepurge, 2 = ignition, 3 = run, 4 = postpurge, 5 = lockout
+    type: uint16
+    default: 3
+    modbus: 20
+  - name: lockout_code
+    type: uint16
+    default: 0
+    modbus: 21
+  - name: burner_cycles
+    type: uint32
+    default: 58213
+    modbus: { start: 22, end: 23 }
+  - name: burner_run_hours
+    type: uint32
+    default: 9420
+    modbus: { start: 24, end: 25 }

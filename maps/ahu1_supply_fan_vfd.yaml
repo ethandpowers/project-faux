@@ -1,0 +1,85 @@
+# Variable frequency drive on AHU-1's supply fan (15 HP, 460V, 1760 RPM motor).
+# Modbus TCP only. Like most drives it uses 16-bit registers with implied
+# scaling: "_x10" fields are tenths (487 = 48.7).
+name: ahu1_supply_fan_vfd
+modbus_device_id: 2
+fields:
+  # Status
+  - name: running
+    type: bool
+    default: true
+    modbus: 0
+  - name: faulted
+    type: bool
+    default: false
+    modbus: 1
+  - name: at_speed
+    type: bool
+    default: true
+    modbus: 2
+  - name: control_mode           # 0 = off, 1 = hand, 2 = auto
+    type: uint16
+    default: 2
+    modbus: 3
+
+  # Live readings
+  - name: output_frequency_hz_x10
+    type: uint16
+    default: 487
+    modbus: 10
+  - name: speed_reference_pct_x10
+    type: uint16
+    default: 812
+    modbus: 11
+  - name: motor_speed_rpm
+    type: uint16
+    default: 1428
+    modbus: 12
+  - name: motor_current_a_x10
+    type: uint16
+    default: 128
+    modbus: 13
+  - name: motor_torque_pct_x10
+    type: int16
+    default: 642
+    modbus: 14
+  - name: dc_bus_voltage
+    type: uint16
+    default: 651
+    modbus: 15
+  - name: output_voltage
+    type: uint16
+    default: 374
+    modbus: 16
+  - name: output_power_kw_x10
+    type: uint16
+    default: 71
+    modbus: 17
+  - name: heatsink_temp_c
+    type: int16
+    default: 41
+    modbus: 18
+
+  # Counters
+  - name: run_hours
+    type: uint32
+    default: 18342
+    modbus: { start: 20, end: 21 }
+  - name: energy_kwh
+    type: uint32
+    default: 96211
+    modbus: { start: 22, end: 23 }
+
+  # Faults. 0 = no fault
+  - name: active_fault_code
+    type: uint16
+    default: 0
+    modbus: 30
+  - name: last_fault_code
+    type: uint16
+    default: 7                   # e.g. DC bus overvoltage
+    modbus: 31
+  - name: active_warning_code
+    type: uint16
+    default: 0
+    modbus: 32

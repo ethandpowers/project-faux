@@ -1,0 +1,82 @@
+# VAV box with hot water reheat serving zone 2-14 (second floor), fed by AHU-1.
+# BACnet MS/TP behind a router in real life; served here as BACnet/IP.
+# Device instance follows a common floor/box convention (2 * 10000 + 14).
+name: vav_2_14
+bacnet_device_id: 20014
+fields:
+  # Zone (°F)
+  - name: zone_temp
+    type: float
+    default: 72.8
+    bacnet: 1
+  - name: occ_cooling_sp
+    type: float
+    default: 74.0
+    bacnet: 2
+  - name: occ_heating_sp
+    type: float
+    default: 70.0
+    bacnet: 3
+  - name: unocc_cooling_sp
+    type: float
+    default: 82.0
+    bacnet: 4
+  - name: unocc_heating_sp
+    type: float
+    default: 62.0
+    bacnet: 5
+  - name: discharge_air_temp
+    type: float
+    default: 56.1
+    bacnet: 6
+  - name: zone_co2_ppm
+    type: float
+    default: 742
+    bacnet: 7
+
+  # Airflow (CFM)
+  - name: airflow
+    type: float
+    default: 640
+    bacnet: 8
+  - name: airflow_sp
+    type: float
+    default: 650
+    bacnet: 9
+  - name: max_airflow_sp
+    type: float
+    default: 900
+    bacnet: 10
+  - name: min_airflow_sp
+    type: float
+    default: 250
+    bacnet: 11
+
+  # Outputs (%)
+  - name: damper_position
+    type: float
+    default: 58.0
+    bacnet: 12
+  - name: reheat_valve_cmd
+    type: float
+    default: 0.0
+    bacnet: 13
+
+  # Status
+  - name: occupied
+    type: bool
+    default: true
+    bacnet: 101
+  - name: occupancy_sensor
+    type: bool
+    default: true
+    bacnet: 102
+  - name: low_airflow_alarm
+    type: bool
+    default: false
+    bacnet: 103
+
+  - name: setpoint_adjust       # Thermostat slider offset, °F (-3 to +3)
+    type: int16
+    default: 0
+    bacnet: 201

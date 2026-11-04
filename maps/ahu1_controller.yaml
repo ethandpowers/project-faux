@@ -1,0 +1,121 @@
+# DDC controller for AHU-1, a VAV air handler with an economizer, chilled
+# water cooling, and hot water preheat. BACnet only, which is typical for
+# native building controllers.
+#
+# Instance blocks: 1-99 analog values, 101-199 binary values,
+# 201-299 integer/multistate-style values, 301+ strings.
+name: ahu1_controller
+bacnet_device_id: 1001
+fields:
+  # Temperatures (°F)
+  - name: oa_temp
+    type: float
+    default: 54.2
+    bacnet: 1
+  - name: ma_temp
+    type: float
+    default: 60.8
+    bacnet: 2
+  - name: ra_temp
+    type: float
+    default: 72.4
+    bacnet: 3
+  - name: da_temp
+    type: float
+    default: 55.3
+    bacnet: 4
+  - name: da_temp_sp
+    type: float
+    default: 55.0
+    bacnet: 5
+
+  # Static pressure (in. w.c.)
+  - name: duct_static
+    type: float
+    default: 1.48
+    bacnet: 6
+  - name: duct_static_sp
+    type: float
+    default: 1.50
+    bacnet: 7
+  - name: filter_dp
+    type: float
+    default: 0.62
+    bacnet: 8
+
+  # Outputs (%)
+  - name: oa_damper_cmd
+    type: float
+    default: 28.0
+    bacnet: 9
+  - name: chw_valve_cmd
+    type: float
+    default: 46.5
+    bacnet: 10
+  - name: hw_valve_cmd
+    type: float
+    default: 0.0
+    bacnet: 11
+  - name: sf_speed_cmd          # matches ahu1_supply_fan_vfd speed reference
+    type: float
+    default: 81.2
+    bacnet: 12
+  - name: rf_speed_cmd
+    type: float
+    default: 72.0
+    bacnet: 13
+
+  # Airflow (CFM)
+  - name: oa_airflow
+    type: float
+    default: 4200
+    bacnet: 14
+  - name: sa_airflow
+    type: float
+    default: 14850
+    bacnet: 15
+
+  # Status and alarms
+  - name: sf_status
+    type: bool
+    default: true
+    bacnet: 101
+  - name: rf_status
+    type: bool
+    default: true
+    bacnet: 102
+  - name: occupied
+    type: bool
+    default: true
+    bacnet: 103
+  - name: economizer_enabled
+    type: bool
+    default: true
+    bacnet: 104
+  - name: freezestat_alarm
+    type: bool
+    default: false
+    bacnet: 105
+  - name: smoke_alarm
+    type: bool
+    default: false
+    bacnet: 106
+  - name: dirty_filter_alarm
+    type: bool
+    default: false
+    bacnet: 107
+
+  # Modes and counters
+  - name: operating_mode        # 1 = off, 2 = occupied, 3 = unoccupied, 4 = warmup, 5 = night purge
+    type: uint16
+    default: 2
+    bacnet: 201
+  - name: sf_run_hours
+    type: uint32
+    default: 18342
+    bacnet: 202
+
+  - name: firmware_version
+    type: string
+    default: "4.2.1"
+    bacnet: 301
