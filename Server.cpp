@@ -19,14 +19,16 @@
 #include <utility>
 #include <vector>
 
-Server::Server(ServerConfig config, const std::atomic<bool> &stop)
-    : config_(std::move(config)), stop_(stop) {}
-
+namespace {
 struct Client {
     sockaddr_in client_address;
     socklen_t client_length;
     std::string input;
 };
+}; // namespace
+
+Server::Server(ServerConfig config, const std::atomic<bool> &stop)
+    : config_(std::move(config)), stop_(stop) {}
 
 void Server::Operate() {
     FieldMapParser parser;
