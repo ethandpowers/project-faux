@@ -19,7 +19,7 @@ My basic requirements are this:
 - yaml-cpp
 - libmodbus (install via system package manager)
 - bacnet-stack
-- argparse
+- CLI11
 
 > [!NOTE]
 > This uses zero-based registers across the board, so the field map and
