@@ -1,5 +1,6 @@
 #include "Client.h"
 #include <arpa/inet.h>
+#include <atomic>
 #include <iostream>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -26,9 +27,24 @@ std::string ClientConfig::ServerStr() {
     return this->server + ":" + std::to_string(this->port);
 }
 
-Client::Client(ClientConfig config) : config_(config) {};
+Client::Client(ClientConfig config, const std::atomic<bool> &stop)
+    : config_(config), stop_(stop) {};
 
-void Client::SendCommand() {
+void Client::Operate() {
+    if (config_.is_repl) {
+        std::cout << "Welcome to the repl!  Enter \"help\" for assistance.\n";
+        while (!stop_) {
+            auto cmd_str = AwaitCommand();
+            if (!cmd_str)
+                continue;
+            SendCommand(cmd_str.value());
+        }
+    } else {
+        SendCommand(config_.command);
+    }
+}
+
+void Client::SendCommand(const std::string command) {
     addrinfo hints{};
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
@@ -54,7 +70,7 @@ void Client::SendCommand() {
                                  config_.ServerStr());
     }
 
-    std::string message = config_.command + "\n";
+    std::string message = command + "\n";
 
     if (send(server_socket, message.data(), message.size(), MSG_NOSIGNAL) < 0) {
         close(server_socket);
@@ -80,10 +96,25 @@ void Client::SendCommand() {
     }
 
     if (IS_A_TTY(FILENO(stdout)) && response.starts_with("Error: ")) {
-        std::cout << ANSI_RED_TEXT << response << ANSI_RESET;
+        std::cerr << ANSI_RED_TEXT << response << ANSI_RESET;
     } else {
         std::cout << response;
     }
 
+    std::cout.flush();
+
     close(server_socket);
+}
+
+std::optional<std::string> Client::AwaitCommand() {
+    std::string cmd;
+    std::cout << "> ";
+
+    std::getline(std::cin, cmd);
+
+    if (!cmd.size()) {
+        return std::nullopt;
+    }
+
+    return cmd;
 }

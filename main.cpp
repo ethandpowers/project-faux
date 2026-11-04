@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
     int port = 1492;
     std::string server = "localhost";
     std::vector<std::string> command_parts;
+    bool is_repl = false;
     std::string field_map;
     bool is_modbus_enabled = false;
     bool is_bacnet_enabled = false;
@@ -44,6 +45,9 @@ int main(int argc, char *argv[]) {
         app.add_option("-s,--server", server, "Target server for client")
             ->capture_default_str();
     auto command_opt = app.add_option("command", command_parts);
+    app.add_flag("-r,--repl", is_repl,
+                 "Open a REPL isntead of sending a command")
+        ->capture_default_str();
 
     // Server args
     CLI::App *server_cmd = app.add_subcommand("serve", "Create a new server");
@@ -85,22 +89,22 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     } else {
-        if (command_parts.empty()) {
+        if (!is_repl && command_parts.empty()) {
             std::cerr << "No command provided\n";
             return 1;
         }
 
-        std::string command = CLI::detail::join(command_parts, " ");
-
         ClientConfig config;
+
         config.port = port;
         config.server = server;
-        config.command = command;
+        config.command = CLI::detail::join(command_parts, " ");
+        config.is_repl = is_repl;
 
-        Client client(config);
+        Client client(config, g_stop);
 
         try {
-            client.SendCommand();
+            client.Operate();
         } catch (const std::exception &err) {
             std::cerr << err.what() << std::endl;
             return 1;
