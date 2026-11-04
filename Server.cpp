@@ -119,7 +119,6 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
 
         // Check if any new connections
         if (pollfds[0].revents & POLLIN) {
-            std::cout << "Incoming connection\n";
             int fd_index = -1;
             for (unsigned int i = 1; i <= max_connections; i++) {
                 if (pollfds[i].fd == -1) {
@@ -156,7 +155,6 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
                 continue;
 
             if (p.revents & (POLLHUP | POLLERR | POLLNVAL)) {
-                std::cout << "Closing connection\n";
                 close_client(i);
                 continue;
             }
@@ -172,7 +170,6 @@ void Server::AcceptTCPRequests(CommandParser &cmd_parser) {
             }
 
             if (bytes_received == 0) {
-                std::cout << "Client close connection.\n";
                 close_client(i);
                 continue;
             }

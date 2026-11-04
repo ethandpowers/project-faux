@@ -95,10 +95,12 @@ void Client::SendCommand(const std::string command) {
         response.append(buffer, bytes_received);
     }
 
-    if (IS_A_TTY(FILENO(stdout)) && response.starts_with("Error: ")) {
-        std::cerr << ANSI_RED_TEXT << response << ANSI_RESET;
-    } else {
-        std::cout << response;
+    if (response != "\n") {
+        if (IS_A_TTY(FILENO(stdout)) && response.starts_with("Error: ")) {
+            std::cerr << ANSI_RED_TEXT << response << ANSI_RESET;
+        } else {
+            std::cout << response;
+        }
     }
 
     std::cout.flush();
