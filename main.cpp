@@ -1,4 +1,5 @@
 #include "CLI/CLI.hpp"
+#include "Client.h"
 #include "Modbus.h"
 #include "Server.h"
 #include <atomic>
@@ -84,8 +85,6 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     } else {
-        // TODO: Implement client
-
         if (command_parts.empty()) {
             std::cerr << "No command provided\n";
             return 1;
@@ -93,7 +92,19 @@ int main(int argc, char *argv[]) {
 
         std::string command = CLI::detail::join(command_parts, " ");
 
-        std::cout << server << ":" << port << " -> " << command << "\n";
+        ClientConfig config;
+        config.port = port;
+        config.server = server;
+        config.command = command;
+
+        Client client(config);
+
+        try {
+            client.SendCommand();
+        } catch (const std::exception &err) {
+            std::cerr << err.what() << std::endl;
+            return 1;
+        }
     }
 
     return 0;

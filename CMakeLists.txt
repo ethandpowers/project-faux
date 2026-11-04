@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(faux main.cpp Server.cpp FieldMapParser.cpp Modbus.cpp Bacnet.cpp Repl.cpp CommandParser.cpp)
+add_executable(faux main.cpp Server.cpp Client.cpp FieldMapParser.cpp Modbus.cpp Bacnet.cpp Repl.cpp CommandParser.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBMODBUS REQUIRED IMPORTED_TARGET libmodbus)
