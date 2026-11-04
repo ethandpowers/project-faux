@@ -1,10 +1,11 @@
+#include "CLI/CLI.hpp"
 #include "Modbus.h"
 #include "Server.h"
-#include <argparse/argparse.hpp>
 #include <atomic>
 #include <csignal>
 #include <exception>
 #include <iostream>
+#include <vector>
 
 namespace {
 std::atomic<bool> g_stop{false};
@@ -22,70 +23,57 @@ void InstallSignalHandlers() {
 } // namespace
 
 int main(int argc, char *argv[]) {
-    argparse::ArgumentParser program("faux");
+    int port = 1492;
+    std::string server = "localhost";
+    std::vector<std::string> command_parts;
+    std::string field_map;
+    bool is_modbus_enabled = false;
+    bool is_bacnet_enabled = false;
+    int modbus_port = 502;
+    int max_modbus_connections = MAX_MODBUS_CONNECTIONS;
 
-    // Shared argument
-    program.add_argument("-p", "--port")
-        .help("Specify server port")
-        .default_value(1492)
-        .scan<'i', int>();
+    CLI::App app("faux");
+    app.fallthrough();
 
-    // Add server arguments
-    argparse::ArgumentParser serve_command("serve");
+    app.add_option("-p,--port", port, "Specify server port")
+        ->capture_default_str();
 
-    serve_command.add_argument("field_map")
-        .help("Supply the location of the field map");
+    // Client args
+    auto server_opt =
+        app.add_option("-s,--server", server, "Target server for client")
+            ->capture_default_str();
+    auto command_opt = app.add_option("command", command_parts);
 
-    serve_command.add_argument("-m", "--modbus")
-        .help("Turn on the modbus server")
-        .default_value(false)
-        .implicit_value(true);
+    // Server args
+    CLI::App *server_cmd = app.add_subcommand("serve", "Create a new server");
+    server_cmd->excludes(server_opt);
+    server_cmd->excludes(command_opt);
+    server_cmd->add_option("field_map", field_map, "Specify the field map")
+        ->required();
+    server_cmd->add_flag("-m,--modbus", is_modbus_enabled,
+                         "Turn on the modbus server");
+    server_cmd->add_flag("-b,--bacnet", is_bacnet_enabled,
+                         "Turn on the BACnet server");
+    server_cmd
+        ->add_option("--modbus-port", modbus_port,
+                     "Set the port for the modbus server")
+        ->capture_default_str();
+    server_cmd
+        ->add_option("--modbus-connections", max_modbus_connections,
+                     "Set the maximum number of modbus connections")
+        ->capture_default_str();
 
-    serve_command.add_argument("-b", "--bacnet")
-        .help("Turn on the BACnet server")
-        .default_value(false)
-        .implicit_value(true);
-
-    serve_command.add_argument("-mc", "--modbus-connections")
-        .help("Maximum allowed modbus connections")
-        .default_value(MAX_MODBUS_CONNECTIONS)
-        .scan<'i', int>();
-
-    serve_command.add_argument("-mp", "--modbus-port")
-        .help("Specify the port for modbus")
-        .default_value(502)
-        .scan<'i', int>();
-
-    program.add_subparser(serve_command);
-
-    // Add client arguments
-    program.add_argument("-s", "--server")
-        .help("Target server for client")
-        .default_value("localhost");
-
-    program.add_argument("command")
-        .help("Command to pass to the server")
-        .remaining();
-
-    try {
-        program.parse_args(argc, argv);
-    } catch (const std::exception &err) {
-        std::cerr << err.what() << std::endl;
-        std::cerr << program;
-        return 1;
-    }
+    CLI11_PARSE(app, argc, argv);
 
     InstallSignalHandlers();
 
-    int port = program.get<int>("-p");
-
-    if (program.is_subcommand_used(serve_command)) {
+    if (*server_cmd) {
         ServerConfig config;
-        config.map_path = serve_command.get("field_map");
-        config.is_modbus_enabled = serve_command.get<bool>("-m");
-        config.is_bacnet_enabled = serve_command.get<bool>("-b");
-        config.max_modbus_connections = serve_command.get<int>("-mc");
-        config.modbus_port = serve_command.get<int>("-mp");
+        config.map_path = field_map;
+        config.is_modbus_enabled = is_modbus_enabled;
+        config.is_bacnet_enabled = is_bacnet_enabled;
+        config.max_modbus_connections = max_modbus_connections;
+        config.modbus_port = modbus_port;
         config.port = port;
 
         try {
@@ -97,24 +85,13 @@ int main(int argc, char *argv[]) {
         }
     } else {
         // TODO: Implement client
-        std::string server = program.get("-s");
 
-        if (!program.present("command")) {
+        if (command_parts.empty()) {
             std::cerr << "No command provided\n";
             return 1;
         }
 
-        std::vector<std::string> rest =
-            program.get<std::vector<std::string>>("command");
-
-        std::string command;
-
-        for (int i = 0; i < rest.size(); i++) {
-            command += rest[i];
-            if (i < rest.size() - 1) {
-                command += " ";
-            }
-        }
+        std::string command = CLI::detail::join(command_parts, " ");
 
         std::cout << server << ":" << port << " -> " << command << "\n";
     }

@@ -30,10 +30,12 @@ set(BACNET_STACK_BUILD_APPS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(bacnet-stack)
 
 FetchContent_Declare(
-    argparse
-    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+    cli11
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG        v2.7.2
 )
-FetchContent_MakeAvailable(argparse)
+
+FetchContent_MakeAvailable(cli11)
 
 set(BACNET_SERVER_DIR "${bacnet-stack_SOURCE_DIR}/src/bacnet/basic/server")
 target_sources(
@@ -48,4 +50,4 @@ target_link_libraries(
     yaml-cpp::yaml-cpp
     PkgConfig::LIBMODBUS
     bacnet-stack::bacnet-stack
-    argparse)
+    CLI11::CLI11)
