@@ -16,6 +16,10 @@ My basic requirements are this:
 
 ## Demo
 
+
+https://github.com/user-attachments/assets/ebf99a70-3b38-44fd-9699-90d353c25fd6
+
+
 [![Demo: faux devices running under docker compose, with values changed from
 the faux client and read live over Modbus (mbpoll) and BACnet
 (Wacnet)](docs/demo.png)](docs/demo.mp4)
