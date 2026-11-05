@@ -14,6 +14,16 @@ My basic requirements are this:
    modbus/bacnet client.
 5. Eventually, I want it to be able to "replay" events given some time-series data.
 
+## Demo
+
+[![Demo: faux devices running under docker compose, with values changed from
+the faux client and read live over Modbus (mbpoll) and BACnet
+(Wacnet)](docs/demo.png)](docs/demo.mp4)
+
+A virtual network started with `docker compose up`, with field values changed
+live via the faux client and picked up over Modbus (mbpoll) and BACnet
+(Wacnet).  Click the image to watch the video.
+
 ## Dependencies
 
 - Docker (if you want to easily spin up a virtual network)
