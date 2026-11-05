@@ -66,6 +66,8 @@ class ModbusCommand : public Command {
             } else {
                 throw std::runtime_error("Unknown property: " + args_[2]);
             }
+        } else if (args_[1] == "status") {
+            return server_.IsActive() ? "online" : "offline";
         } else {
             throw std::runtime_error("Unknown subcommand: " + args_[1]);
         }
@@ -97,6 +99,8 @@ class BacnetCommand : public Command {
                 throw std::runtime_error("BACnet server not active");
 
             server_.Stop();
+        } else if (args_[1] == "status") {
+            return server_.IsActive() ? "online" : "offline";
         } else {
             throw std::runtime_error("Unknown subcommand: " + args_[1]);
         }

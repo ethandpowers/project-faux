@@ -27,7 +27,7 @@ My basic requirements are this:
 > request register numbers must match.  All multi-register types are
 > represented in big-endian format.
 
-## Executing Commands
+## Basic Usage
 
 You can start the server via the included `Dockerfile`, `compose.yaml`, or
 calling the binary directly.  The same binary can be used as a server or
@@ -44,6 +44,12 @@ The following flags are available for the server:
 | --modbus-port | Specify the Modbus port |
 | --modbus-connections | Set the max modbus connections |
 
+> [!NOTE]
+> I am using the `bacnet-stack` library for all BACnet operations, so if
+> you want to customize the BACnet options (interface, port, etc.) you
+> can use the env variables supported by that library, ex.
+> `BACNET_IFACE=eth0 faux serve ./maps/sample1.yaml`
+
 To maintain extreme scriptability (Is that a word?  It is now!), faux fully
 supports using netcat (or any other TCP client) for controlling the server. You
 can use it to create interactive sessions with `nc <host> <port>` or you can
@@ -58,6 +64,41 @@ executing single commands, or with a REPL.  If you call `faux` without the
 | -p, --port | Specify server control port (TCP) |
 | -s, --server | Target server for client |
 | -r, --repl | Open a REPL instead of sending a command |
+
+### Commands
+
+Commands are sent as a single line of text over the control port, either with
+the `faux` client or any TCP client like netcat.  Arguments are separated by
+whitespace.
+
+| Command | Description |
+| ------- | ----------- |
+| `help` | Show the help message |
+| `field list` | List every field in the field map |
+| `field get <name>` | Get the current value of a field |
+| `field set <name> <value>` | Set the value of a field |
+| `modbus start` | Start the Modbus server |
+| `modbus stop` | Stop the Modbus server |
+| `modbus status` | Get the status of the Modbus server |
+| `modbus get port` | Get the port the Modbus server listens on |
+| `modbus get max-connections` | Get the max number of Modbus connections |
+| `modbus set max-connections <n>` | Set the max number of Modbus connections |
+| `bacnet start` | Start the BACnet server |
+| `bacnet stop` | Stop the BACnet server |
+| `bacnet status` | Get the status of the BACnet server |
+
+For `field set`, the value is parsed according to the field's type in the
+field map.  Booleans must be `true` or `false`, and since arguments are split
+on whitespace, string values can't contain spaces.
+
+For example:
+
+```sh
+faux field list
+faux field set da_temp_sp 55.5
+faux -s 172.28.0.13 field get da_temp_sp
+echo "field get da_temp" | nc localhost 1492 -N
+```
 
 ## Creating A Virtual Network With Docker
 
