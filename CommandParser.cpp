@@ -127,7 +127,7 @@ class FieldCommand : public Command {
         if (args_[1] == "list") {
             std::string field_str;
             for (Field &field : map_.fields) {
-                field_str.append(field.ToString());
+                field_str.append(field.ToString() + "\n");
             }
             return field_str;
         } else if (args_[1] == "get") {
@@ -181,6 +181,7 @@ class FieldCommand : public Command {
                             throw std::runtime_error("Invalid boolean value");
                         field.value = value == "true";
                     }
+                    field.bacnet->is_dirty = true;
                     return std::nullopt;
                 }
             }
